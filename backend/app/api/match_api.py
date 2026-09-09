@@ -33,7 +33,9 @@ def match_jobs(
         profile_data = {
             "skills": profile.skills or [],
             "experience": profile.experience,
+            "education": profile.education,
             "years_of_experience": profile.years_of_experience,
+            "profile_summary": profile.profile_summary or "",
         }
 
         job_list = [

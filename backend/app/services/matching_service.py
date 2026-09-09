@@ -44,9 +44,9 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
         if len(matched_skills) > 0:
             final_score_percent = round((0.3 * similarity + 0.7 * skill_overlap) * 100, 2)
         else:
-            final_score_percent = round(similarity * 100, 2)
+            final_score_percent = round(similarity * 50, 2)
 
-        if final_score_percent < 40:
+        if final_score_percent < 60:
             continue
 
         explanation = generate_match_explanation(profile, job, job_skills=job_skills)
