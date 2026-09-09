@@ -1,14 +1,17 @@
-def generate_match_explanation(profile, job):
+def generate_match_explanation(profile, job, job_skills=None):
 
     profile_skills = set(
         skill.lower()
         for skill in (profile.get("skills") or [])
     )
 
-    job_skills = set(
-        skill.lower()
-        for skill in (job.get("skills") or [])
-    )
+    if job_skills is None:
+        job_skills = set(
+            skill.lower()
+            for skill in (job.get("skills") or [])
+        )
+    else:
+        job_skills = set(str(skill).lower() for skill in job_skills)
 
     matched_skills = list(profile_skills & job_skills)
 

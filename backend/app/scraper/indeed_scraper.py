@@ -2,14 +2,14 @@ import pandas as pd
 from jobspy import scrape_jobs
 
 
-def scrape_indeed_jobs(search_term: str, location: str = "", country: str = "USA", results_wanted: int = 25, full_description: bool = False):
+def scrape_indeed_jobs(search_term: str, location: str = "", country: str = "USA", results_wanted: int = 25, full_description: bool = True):
     jobs = scrape_jobs(
         site_name="indeed",
         search_term=search_term,
         location=location,
         country_indeed=country,
         results_wanted=results_wanted,
-        full_description=full_description,
+        full_description=True if full_description is None else full_description,
     )
 
     return _to_dicts(jobs)

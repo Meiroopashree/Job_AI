@@ -306,20 +306,22 @@ export default function DashboardPage() {
               </div>
               <div className="hide-scrollbar max-h-80 space-y-2 overflow-y-auto pr-1">
                 {scrapedJobs.map((job) => (
-                  <div
+                  <Link
                     key={job.id}
+                    href={`/jobs/job/${job.id}`}
                     className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-blue-200 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-blue-900 dark:hover:bg-blue-950/20"
                   >
                     <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-blue-400">
                       <Briefcase className="size-4" />
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{job.title}</p>
                       <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                         {job.company} &middot; {job.location}
                       </p>
                     </div>
-                  </div>
+                    <ArrowRight className="mt-1.5 size-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 dark:text-slate-600" />
+                  </Link>
                 ))}
               </div>
             </div>

@@ -27,11 +27,29 @@ def extract_skills(text: str):
         return []
 
     common_skills = [
-        "python", "java", "sql", "react", "node",
-        "fastapi", "aws", "docker", "kubernetes",
-        "machine learning", "nlp", "ai",
-        "typescript", "javascript", "nextjs",
-        "postgresql", "mongodb"
+        # backend / languages
+        "python", "java", "go", "golang", "ruby", "php", "c#", "c++", "csharp",
+        "scala", "kotlin", "rust", "swift",
+        # frontend
+        "react", "react native", "angular", "vue", "node", "node.js", "nextjs",
+        "typescript", "javascript", "html", "css", "sass", "tailwind", "redux", "webpack",
+        # frameworks / apis
+        "fastapi", "django", "flask", "spring", "dotnet", ".net", "laravel", "rails",
+        "graphql", "rest", "rest api", "apache kafka", "kafka", "redis",
+        # databases
+        "sql", "mysql", "postgresql", "postgres", "mongodb", "dynamodb", "oracle",
+        "sqlite", "elasticsearch", "cassandra", "snowflake", "bigquery",
+        # data / ml / ai
+        "machine learning", "deep learning", "nlp", "ai", "pandas", "numpy",
+        "pytorch", "tensorflow", "scikit-learn", "keras", "data science",
+        "data engineering", "etl", "spark", "airflow", "dbt", "llm",
+        # devops / cloud
+        "aws", "azure", "gcp", "google cloud", "docker", "kubernetes", "terraform",
+        "jenkins", "ci/cd", "linux", "bash", "shell", "nginx", "helm", "prometheus",
+        "grafana", "github actions", "gitlab", "ansible", "cloudformation",
+        # testing / other
+        "jest", "cypress", "pytest", "selenium", "junit", "api testing",
+        "microservices", "agile", "scrum", "rabbitmq", "message queue",
     ]
 
     text_lower = text.lower()
@@ -40,9 +58,9 @@ def extract_skills(text: str):
 
     for skill in common_skills:
         if skill in text_lower:
-            found.append(skill)
+            found.append(skill.strip())
 
-    return list(set(found))  # remove duplicates
+    return list(dict.fromkeys(found))  # remove duplicates, preserve order
 
 
 # =========================
@@ -57,7 +75,8 @@ def normalize_job(job: dict):
     skills = job.get("skills", [])
 
     if not isinstance(skills, list) or len(skills) == 0:
-        skills = extract_skills(description)
+        title = str(job.get("title", "")).strip()
+        skills = extract_skills(f"{title} {description}")
 
     return {
         "title": job.get("title", "").strip(),

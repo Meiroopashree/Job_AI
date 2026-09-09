@@ -120,3 +120,24 @@ def list_jobs():
         ]
     finally:
         db.close()
+
+
+@router.get("/{job_id}")
+def get_job(job_id: int):
+    db = SessionLocal()
+    try:
+        job = db.query(Job).filter(Job.id == job_id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return {
+            "id": job.id,
+            "title": job.title,
+            "company": job.company,
+            "location": job.location,
+            "description": job.description or "",
+            "skills": job.skills or [],
+            "apply_url": job.apply_url or "",
+            "created_at": str(job.created_at),
+        }
+    finally:
+        db.close()
