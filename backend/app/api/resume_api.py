@@ -1,10 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 import shutil
 import os
 
 from app.services.experience_calc import calculate_experience
 from app.services.resume_parser import extract_resume_text
 from app.ai.mistral_extractor import extract_resume_data
+from app.ai.mistral_client import MistralError
 from app.db.database import SessionLocal
 from app.services.profile_service import save_profile
 from app.models.user_model import User
@@ -50,7 +51,13 @@ async def upload_resume(
             "file": file.filename,
         }
 
-    extracted_data = extract_resume_data(resume_text)
+    try:
+        extracted_data = extract_resume_data(resume_text)
+    except MistralError as e:
+        status = e.status_code if e.status_code in (429, 500, 502, 503, 504) else 502
+        raise HTTPException(status_code=status, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Resume parsing failed: {e}")
 
     if (
         not extracted_data.get("skills")

@@ -1,8 +1,8 @@
 import json
 import os
-import re
-import requests
 from dotenv import load_dotenv
+
+from app.ai.mistral_client import chat_completion, parse_model_json
 
 load_dotenv()
 
@@ -10,22 +10,10 @@ MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
 
 
-def clean_json(content: str):
-    content = re.sub(r"```json", "", content)
-    content = re.sub(r"```", "", content)
-    return content.strip()
-
-
 def check_ats_score(profile_data: dict):
     prompt = build_ats_check_prompt(profile_data)
 
-    headers = {
-        "Authorization": f"Bearer {MISTRAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
     payload = {
-        "model": "mistral-small-latest",
         "messages": [
             {"role": "user", "content": prompt}
         ],
@@ -33,23 +21,9 @@ def check_ats_score(profile_data: dict):
         "max_tokens": 2000
     }
 
-    response = requests.post(MISTRAL_URL, headers=headers, json=payload)
+    content = chat_completion(MISTRAL_API_KEY, payload)
 
-    if response.status_code != 200:
-        raise Exception(f"Mistral API Error: {response.text}")
-
-    content = response.json()["choices"][0]["message"]["content"]
-    cleaned = clean_json(content)
-
-    try:
-        result = json.loads(cleaned)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-        if not match:
-            raise ValueError("Invalid JSON from Mistral for ATS check")
-        result = json.loads(match.group())
-
-    return result
+    return parse_model_json(content)
 
 
 def build_ats_check_prompt(profile: dict):
@@ -142,13 +116,7 @@ Resume Data:
 def generate_ats_resume(profile_data: dict, suggestions: list = None):
     prompt = build_ats_generate_prompt(profile_data, suggestions)
 
-    headers = {
-        "Authorization": f"Bearer {MISTRAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
     payload = {
-        "model": "mistral-small-latest",
         "messages": [
             {"role": "user", "content": prompt}
         ],
@@ -156,23 +124,9 @@ def generate_ats_resume(profile_data: dict, suggestions: list = None):
         "max_tokens": 4000
     }
 
-    response = requests.post(MISTRAL_URL, headers=headers, json=payload)
+    content = chat_completion(MISTRAL_API_KEY, payload)
 
-    if response.status_code != 200:
-        raise Exception(f"Mistral API Error: {response.text}")
-
-    content = response.json()["choices"][0]["message"]["content"]
-    cleaned = clean_json(content)
-
-    try:
-        result = json.loads(cleaned)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-        if not match:
-            raise ValueError("Invalid JSON from Mistral for ATS generation")
-        result = json.loads(match.group())
-
-    return result
+    return parse_model_json(content)
 
 
 def build_ats_generate_prompt(profile: dict, suggestions: list = None):

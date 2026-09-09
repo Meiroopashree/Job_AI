@@ -33,7 +33,18 @@ def calculate_experience(experience_list):
 
     total_months = 0
 
+    if not isinstance(experience_list, list):
+        return {
+            "years": 0,
+            "months": 0,
+            "total_months": 0,
+            "decimal_years": 0.0,
+        }
+
     for job in experience_list:
+
+        if not isinstance(job, dict):
+            continue
 
         start = parse_date(job.get("start_date"))
         end = parse_date(job.get("end_date"))

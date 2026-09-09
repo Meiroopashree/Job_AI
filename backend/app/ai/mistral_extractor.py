@@ -1,22 +1,12 @@
 import os
-import json
-import re
-import requests
 from dotenv import load_dotenv
+
+from app.ai.mistral_client import chat_completion, parse_model_json
 
 load_dotenv()
 
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
-
-
-# =========================
-# CLEAN OUTPUT
-# =========================
-def clean_json(content: str):
-    content = re.sub(r"```json", "", content)
-    content = re.sub(r"```", "", content)
-    return content.strip()
 
 
 # =========================
@@ -197,40 +187,16 @@ def extract_resume_data(resume_text: str):
 
     prompt = build_prompt(resume_text)
 
-    headers = {
-        "Authorization": f"Bearer {MISTRAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
     payload = {
-        "model": "mistral-small-latest",
         "messages": [
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.1
     }
 
-    response = requests.post(
-        MISTRAL_URL,
-        headers=headers,
-        json=payload
-    )
+    content = chat_completion(MISTRAL_API_KEY, payload)
 
-    if response.status_code != 200:
-        raise Exception(f"Mistral API Error: {response.text}")
-
-    content = response.json()["choices"][0]["message"]["content"]
-
-    cleaned = clean_json(content)
-
-    try:
-        parsed = json.loads(cleaned)
-
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-        if not match:
-            raise ValueError("Invalid JSON from Mistral")
-        parsed = json.loads(match.group())
+    parsed = parse_model_json(content)
 
     # FINAL SAFETY LAYER
     return validate_data(parsed)
