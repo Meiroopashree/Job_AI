@@ -51,16 +51,18 @@ def extract_skills(text: str):
         "jest", "cypress", "pytest", "selenium", "junit", "api testing",
         "microservices", "agile", "scrum", "rabbitmq", "message queue",
         # accounting / finance
-        "accounting", "accounts payable", "accounts receivable", "general ledger",
-        "bookkeeping", "financial reporting", "financial analysis", "tax preparation",
-        "tax compliance", "audit", "auditing", "accounts reconciliation",
-        "bank reconciliation", "payroll", "erp", "sap", "quickbooks",
-        "xero", "freshbooks", "sage", "tally", "excel", "vba",
+        "accounting", "accountant", "accounts payable", "accounts receivable",
+        "general ledger", "bookkeeping", "financial reporting", "financial analysis",
+        "tax preparation", "tax compliance", "gst", "gst filing",
+        "audit", "auditing", "accounts reconciliation", "bank reconciliation",
+        "payroll", "erp", "sap", "quickbooks",
+        "xero", "freshbooks", "sage", "tally", "tally erp", "excel", "vba",
         "ifrs", "gaap", "cost accounting", "budgeting", "forecasting",
-        "accounts", "finance", "financial statements", "balance sheet",
+        "accounts", "finance", "financial", "financial statements", "balance sheet",
         "profit and loss", "cash flow", "revenue recognition",
         "accounts management", "billing", "invoicing", "ledger",
         "fiscal", "compliance", "regulatory", "internal controls",
+        "receivable", "payable", "ca", "chartered accountant",
     ]
 
     text_lower = text.lower()
