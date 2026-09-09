@@ -1,4 +1,4 @@
-def generate_match_explanation(profile, job, job_skills=None):
+def generate_match_explanation(profile, job, job_skills=None, matched_skills=None):
 
     profile_skills = set(
         skill.lower()
@@ -13,9 +13,14 @@ def generate_match_explanation(profile, job, job_skills=None):
     else:
         job_skills = set(str(skill).lower() for skill in job_skills)
 
-    matched_skills = list(profile_skills & job_skills)
+    if matched_skills is None:
+        matched_skills = profile_skills & job_skills
+    else:
+        matched_skills = set(str(skill).lower() for skill in matched_skills)
 
-    missing_skills = list(job_skills - profile_skills)
+    matched_skills = list(matched_skills & job_skills)
+
+    missing_skills = list(job_skills - set(matched_skills))
 
     match_count = len(matched_skills)
     missing_count = len(missing_skills)

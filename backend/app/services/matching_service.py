@@ -1,4 +1,3 @@
-import re
 from app.ai.embeddings import compute_similarities
 
 from app.services.profile_vectorizer import build_profile_text
@@ -6,51 +5,24 @@ from app.services.job_vectorizer import build_job_text
 from app.services.job_normalizer import extract_skills
 from app.services.explanation_service import generate_match_explanation
 
-ACCOUNTING_DOMAIN_WORDS = {
-    "accounting", "accountant", "accounts", "finance", "financial",
-    "gst", "tally", "payroll", "billing", "invoicing", "reconcil",
-    "ledger", "audit", "auditing", "tax", "bookkeeping", "receivable",
-    "payable", "ifrs", "gaap",
-    "quickbooks", "xero",
-    "profit and loss", "revenue recognition", "balance sheet",
-    "cost accounting", "financial reporting", "financial analysis",
-    "bank reconciliation", "accounts payable", "accounts receivable",
-}
 
-STOP_WORDS = {
-    "a", "an", "the", "and", "or", "of", "in", "for", "to", "at", "on",
-    "with", "by", "from", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "shall", "can", "need", "must", "not", "no",
-    "but", "if", "so", "than", "that", "this", "it", "its", "as", "we",
-    "our", "their", "your", "my", "me", "us", "them", "you", "he", "she",
-    "they", "who", "which", "what", "where", "when", "how", "all", "each",
-    "every", "both", "few", "more", "most", "other", "some", "such", "only",
-    "very", "also", "just", "about", "above", "after", "before", "between",
-    "into", "through", "during", "up", "down", "out", "off", "over", "under",
-    "again", "further", "then", "once", "here", "there", "why", "am", "own",
-    "same", "too", "any", "year", "years", "experience", "job", "role",
-    "position", "company", "looking", "team", "work", "working", "new",
-    "ability", "skills", "strong", "excellent", "knowledge", "plus",
-    "good", "preferred", "required", "minimum", "detail", "effective",
-    "abilities", "skill", "power", "office", "data", "management",
-    "analysis", "reporting", "record", "records", "entry", "performance",
-    "tracking", "maintaining", "precise", "proficient", "expertise",
-    "assistant", "oriented", "proactive", "solid", "experienced",
-}
-
-
-def _build_domain_keywords(profile_skills, profile_text):
-    """Build a set of domain-specific keywords from the profile."""
-    return set(ACCOUNTING_DOMAIN_WORDS)
-
-
-def _count_domain_matches(job_text, domain_keywords):
-    """Count how many domain keywords from the profile appear in job text."""
-    if not job_text or not domain_keywords:
-        return 0
-    text_lower = job_text.lower()
-    return sum(1 for kw in domain_keywords if kw in text_lower)
+def _skills_match(profile_skill: str, job_skill: str) -> bool:
+    """True if a profile skill and a job skill refer to the same capability."""
+    p = profile_skill.lower().strip()
+    j = job_skill.lower().strip()
+    if not p or not j:
+        return False
+    if p == j:
+        return True
+    if p in j or j in p:
+        return True
+    common_prefix = 0
+    for a, b in zip(p, j):
+        if a != b:
+            break
+        common_prefix += 1
+    shorter = min(len(p), len(j))
+    return common_prefix >= 5 and common_prefix >= 0.6 * shorter
 
 
 def match_profile_to_jobs(profile, jobs, page=1, limit=10):
@@ -61,8 +33,6 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
     )
     if not profile_skills:
         profile_skills = set(extract_skills(profile_text))
-
-    domain_keywords = _build_domain_keywords(profile_skills, profile_text)
 
     job_texts = [build_job_text(job) for job in jobs]
     similarities = compute_similarities(profile_text, job_texts)
@@ -80,32 +50,25 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
         if not job_skills:
             job_skills = set(extract_skills(job_text))
 
-        matched_skills = profile_skills & job_skills
-
-        if profile_skills and job_skills:
-            denominator = min(len(profile_skills), len(job_skills))
-            skill_overlap = len(matched_skills) / denominator if denominator > 0 else 0
-        else:
-            skill_overlap = 0
+        matched_skills = set(
+            js for js in job_skills
+            if any(_skills_match(ps, js) for ps in profile_skills)
+        )
 
         similarity = similarities[idx] if has_similarities else 0
 
-        domain_match_count = _count_domain_matches(job_text, domain_keywords)
-
-        if len(matched_skills) > 0:
-            score_a = (0.3 * similarity + 0.7 * skill_overlap) * 100
-            score_b = 55 + min(40, len(matched_skills) * 10)
-            final_score_percent = round(max(score_a, score_b), 2)
-        elif domain_match_count > 0:
-            base = 55 + min(40, domain_match_count * 12)
-            final_score_percent = round(base + similarity * 5, 2)
+        if len(matched_skills) > 0 and job_skills:
+            skill_coverage = len(matched_skills) / len(job_skills)
+            final_score_percent = round((0.4 * similarity + 0.6 * skill_coverage) * 100, 2)
         else:
-            final_score_percent = round(similarity * 40, 2)
+            final_score_percent = round(similarity * 35, 2)
 
         if final_score_percent < 60:
             continue
 
-        explanation = generate_match_explanation(profile, job, job_skills=job_skills)
+        explanation = generate_match_explanation(
+            profile, job, job_skills=job_skills, matched_skills=matched_skills
+        )
 
         results.append({
             "job": {
