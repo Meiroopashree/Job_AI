@@ -62,7 +62,13 @@ def save_job(db, job_data):
         location=job_data["location"],
         description=job_data["description"],
         skills=job_data["skills"],
-        apply_url=job_data["apply_url"]
+        apply_url=job_data["apply_url"],
+        salary_min=job_data.get("salary_min"),
+        salary_max=job_data.get("salary_max"),
+        salary_interval=job_data.get("salary_interval"),
+        salary_currency=job_data.get("salary_currency"),
+        date_posted=job_data.get("date_posted"),
+        source=job_data.get("source"),
     )
 
     db.add(job)

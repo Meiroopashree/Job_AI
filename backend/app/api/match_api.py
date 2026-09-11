@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta, timezone
 
 from app.db.database import SessionLocal
 from app.models.profile_model import Profile
@@ -17,6 +18,7 @@ def match_jobs(
     user: User = Depends(get_current_user),
     page: int = 1,
     limit: int = 10,
+    days: int = None,
 ):
     db: Session = SessionLocal()
     try:
@@ -28,7 +30,12 @@ def match_jobs(
         if not profile:
             return {"error": "Profile not found"}
 
-        jobs = db.query(Job).all()
+        job_query = db.query(Job)
+        if days:
+            cutoff = datetime.now(timezone.utc) - timedelta(days=max(1, min(days, 365)))
+            job_query = job_query.filter(Job.created_at >= cutoff)
+
+        jobs = job_query.all()
 
         profile_data = {
             "skills": profile.skills or [],
@@ -47,6 +54,12 @@ def match_jobs(
                 "description": job.description,
                 "skills": job.skills or [],
                 "apply_url": job.apply_url,
+                "salary_min": job.salary_min,
+                "salary_max": job.salary_max,
+                "salary_interval": job.salary_interval,
+                "salary_currency": job.salary_currency,
+                "date_posted": job.date_posted,
+                "source": job.source,
             }
             for job in jobs
         ]

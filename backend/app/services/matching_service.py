@@ -77,7 +77,13 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
                 "company": job.get("company"),
                 "location": job.get("location"),
                 "description": job.get("description"),
-                "apply_url": job.get("apply_url")
+                "apply_url": job.get("apply_url"),
+                "salary_min": job.get("salary_min"),
+                "salary_max": job.get("salary_max"),
+                "salary_interval": job.get("salary_interval"),
+                "salary_currency": job.get("salary_currency"),
+                "date_posted": job.get("date_posted"),
+                "source": job.get("source"),
             },
             "match_percentage": final_score_percent,
             "explanation": explanation

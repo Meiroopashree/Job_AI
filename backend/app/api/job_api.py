@@ -159,6 +159,12 @@ def list_jobs(
                     "skills": j.skills,
                     "description": (j.description or "")[:500],
                     "apply_url": j.apply_url,
+                    "salary_min": j.salary_min,
+                    "salary_max": j.salary_max,
+                    "salary_interval": j.salary_interval,
+                    "salary_currency": j.salary_currency,
+                    "date_posted": j.date_posted,
+                    "source": j.source,
                     "created_at": str(j.created_at),
                 }
                 for j in jobs
@@ -256,6 +262,12 @@ def get_job(job_id: int):
             "description": job.description or "",
             "skills": job.skills or [],
             "apply_url": job.apply_url or "",
+            "salary_min": job.salary_min,
+            "salary_max": job.salary_max,
+            "salary_interval": job.salary_interval,
+            "salary_currency": job.salary_currency,
+            "date_posted": job.date_posted,
+            "source": job.source,
             "created_at": str(job.created_at),
         }
     finally:

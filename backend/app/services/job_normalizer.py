@@ -99,6 +99,15 @@ def normalize_job(job: dict):
         title = str(job.get("title", "")).strip()
         skills = extract_skills(f"{title} {description}")
 
+    apply_url = job.get("apply_url", "").strip()
+    source = str(job.get("source", "") or "").strip()
+    if not source:
+        source_url = apply_url.lower()
+        if "linkedin.com" in source_url:
+            source = "linkedin"
+        elif "indeed.com" in source_url:
+            source = "indeed"
+
     return {
         "title": job.get("title", "").strip(),
         "company": job.get("company", "").strip(),
@@ -107,8 +116,15 @@ def normalize_job(job: dict):
         # CLEAN TEXT VERSION (FIXED)
         "description": description,
 
-        "apply_url": job.get("apply_url", "").strip(),
+        "apply_url": apply_url,
 
         # FINAL CLEAN SKILLS
-        "skills": skills
+        "skills": skills,
+
+        "salary_min": job.get("salary_min"),
+        "salary_max": job.get("salary_max"),
+        "salary_interval": job.get("salary_interval"),
+        "salary_currency": job.get("salary_currency"),
+        "date_posted": job.get("date_posted"),
+        "source": source,
     }

@@ -10,6 +10,8 @@ from app.api.match_api import router as match_router
 from app.api.auth_api import router as auth_router
 from app.api.profile_api import router as profile_router
 from app.api.ats_api import router as ats_router
+from app.api.applications_api import router as applications_router
+from app.api.generate_api import router as generate_router
 from app.db.init_db import init_db
 
 
@@ -38,6 +40,8 @@ app.include_router(profile_router)
 app.include_router(job_router, prefix="/jobs", tags=["Jobs"])
 app.include_router(match_router, prefix="/match", tags=["Match"])
 app.include_router(ats_router)
+app.include_router(applications_router)
+app.include_router(generate_router)
 
 
 @app.get("/", tags=["System"])
@@ -61,6 +65,9 @@ def root():
             "/ats/check/{profile_id}",
             "/ats/generate/{profile_id}",
             "/ats/score/{profile_id}",
+            "/applications",
+            "/generate/cover-letter",
+            "/generate/tailored-resume",
             "/health",
         ],
     }
