@@ -118,9 +118,10 @@ export default function DashboardPage() {
     setScrapedJobs([]);
 
     try {
-      const body: Record<string, string> = { platform: selectedPlatform };
+      const body: Record<string, string | number> = { platform: selectedPlatform };
       platform.fields.forEach((f) => {
-        body[f.key] = fieldValues[f.key] || "";
+        const v = fieldValues[f.key]?.trim();
+        if (v) body[f.key] = f.key === "results_wanted" ? Number(v) : v;
       });
       const res = await api.post("/jobs/scrape", body);
       setScrapedJobs(res.data.jobs || []);
