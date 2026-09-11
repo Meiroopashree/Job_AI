@@ -12,6 +12,9 @@ import {
   Building2,
   MapPin,
   SearchX,
+  DollarSign,
+  Calendar,
+  Globe,
 } from "lucide-react";
 
 interface JobDetail {
@@ -23,6 +26,25 @@ interface JobDetail {
   skills: string[];
   apply_url: string;
   created_at: string;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  salary_interval?: string | null;
+  salary_currency?: string | null;
+  date_posted?: string | null;
+  source?: string | null;
+}
+
+function formatSalary(min?: number | null, max?: number | null, interval?: string | null, currency?: string | null): string | null {
+  if (!min && !max) return null;
+  const fmt = (n: number) => {
+    if (n >= 1000) return `${Math.round(n / 1000)}k`;
+    return String(Math.round(n));
+  };
+  const cur = currency || "$";
+  const intervalLabel = interval === "hourly" ? "/hr" : interval === "monthly" ? "/mo" : interval === "yearly" ? "/yr" : "";
+  if (min && max) return `${cur}${fmt(min)} - ${cur}${fmt(max)}${intervalLabel}`;
+  if (min) return `${cur}${fmt(min)}+${intervalLabel}`;
+  return `Up to ${cur}${fmt(max!)}${intervalLabel}`;
 }
 
 export default function JobDetailPage() {
@@ -121,6 +143,28 @@ export default function JobDetailPage() {
                     <MapPin className="size-4 shrink-0" />
                     {job.location || "Location not specified"}
                   </span>
+                  {(() => {
+                    const salary = formatSalary(job.salary_min, job.salary_max, job.salary_interval, job.salary_currency);
+                    if (!salary) return null;
+                    return (
+                      <span className="flex items-center gap-1.5">
+                        <DollarSign className="size-4 shrink-0" />
+                        {salary}
+                      </span>
+                    );
+                  })()}
+                  {job.date_posted && (
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="size-4 shrink-0" />
+                      {job.date_posted}
+                    </span>
+                  )}
+                  {job.source && (
+                    <span className="flex items-center gap-1.5">
+                      <Globe className="size-4 shrink-0" />
+                      {job.source}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -18,6 +18,12 @@ interface JobItem {
     location: string;
     description?: string;
     apply_url?: string;
+    salary_min?: number | null;
+    salary_max?: number | null;
+    salary_interval?: string | null;
+    salary_currency?: string | null;
+    date_posted?: string | null;
+    source?: string | null;
   };
   match_percentage: number;
   explanation?: {
@@ -36,6 +42,7 @@ export default function JobsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
+  const [onlyRecent, setOnlyRecent] = useState(false);
   const params = useParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -50,7 +57,7 @@ export default function JobsPage() {
       setError("");
       try {
         const res = await api.get(`/match/${profileId}`, {
-          params: { page, limit: PAGE_SIZE },
+          params: { page, limit: PAGE_SIZE, days: onlyRecent ? 7 : undefined },
         });
         setJobs(res.data.results || []);
         setTotalPages(res.data.total_pages || 1);
@@ -63,12 +70,12 @@ export default function JobsPage() {
     };
     fetchJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileId, user, page]);
+  }, [profileId, user, page, onlyRecent]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
-  }, [profileId]);
+  }, [profileId, onlyRecent]);
 
   if (isLoading || !user) return null;
 
@@ -92,6 +99,15 @@ export default function JobsPage() {
               {totalJobs > 0 ? `${totalJobs} jobs ranked for your profile` : "AI-matched jobs based on your profile"}
             </p>
           </div>
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200/70 bg-white/80 px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-800">
+            <input
+              type="checkbox"
+              checked={onlyRecent}
+              onChange={(e) => setOnlyRecent(e.target.checked)}
+              className="size-4 accent-blue-600"
+            />
+            New matches (last 7 days)
+          </label>
         </div>
       </div>
 
@@ -147,7 +163,7 @@ export default function JobsPage() {
         <>
           <div className="mb-8 space-y-4">
             {jobs.map((item: JobItem, index: number) => (
-              <JobCard key={item?.job?.id ?? index} item={item} />
+              <JobCard key={item?.job?.id ?? index} item={item} profileId={Number(profileId)} />
             ))}
           </div>
 
