@@ -169,13 +169,13 @@ def list_jobs(
 
 
 @router.post("/backfill")
-def backfill_job_skills():
+def backfill_job_skills(force: bool = False):
     db = SessionLocal()
     try:
         jobs = db.query(Job).all()
         updated = 0
         for job in jobs:
-            if job.skills:
+            if job.skills and not force:
                 continue
             text = f"{job.title or ''} {job.description or ''}"
             skills = list(dict.fromkeys(extract_skills(text)))
