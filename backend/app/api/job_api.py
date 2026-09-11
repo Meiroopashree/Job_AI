@@ -187,6 +187,60 @@ def backfill_job_skills():
         db.close()
 
 
+@router.post("/backfill/descriptions")
+def backfill_job_descriptions(limit: int = 20):
+    from app.services.job_description_backfill import (
+        extract_skills_for_job,
+        fetch_job_description,
+    )
+
+    db = SessionLocal()
+    try:
+        jobs = (
+            db.query(Job)
+            .filter(or_(Job.description.is_(None), Job.description == ""))
+            .order_by(Job.id.asc())
+            .limit(max(1, min(limit, 50)))
+            .all()
+        )
+
+        updated = 0
+        skipped = 0
+        failed = 0
+        for job in jobs:
+            if not job.apply_url:
+                skipped += 1
+                continue
+            try:
+                desc = fetch_job_description(job.apply_url)
+                if not desc:
+                    skipped += 1
+                    continue
+                job.description = desc
+                if not job.skills:
+                    job.skills = extract_skills_for_job(job.title, desc)
+                updated += 1
+            except Exception:
+                failed += 1
+            time.sleep(0.5)
+        db.commit()
+
+        remaining = (
+            db.query(Job)
+            .filter(or_(Job.description.is_(None), Job.description == ""))
+            .count()
+        )
+        return {
+            "message": "Descriptions backfill complete",
+            "updated": updated,
+            "skipped": skipped,
+            "failed": failed,
+            "remaining": remaining,
+        }
+    finally:
+        db.close()
+
+
 @router.get("/{job_id}")
 def get_job(job_id: int):
     db = SessionLocal()
