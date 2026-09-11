@@ -11,8 +11,10 @@ import {
   TrendingUp,
   FileText,
   ArrowRight,
+  Clock,
   LoaderCircle,
   Pencil,
+  RefreshCw,
   Trash2,
   Search,
   Sparkles,
@@ -25,6 +27,18 @@ interface Platform {
   name: string;
   tagline: string;
   fields: { key: string; label: string; placeholder: string }[];
+}
+
+interface AutoStatus {
+  enabled: boolean | null;
+  interval_hours: number | null;
+  running: boolean;
+  last_run: string | null;
+  last_status: string | null;
+  last_counts: Record<string, number>;
+  errors: string[];
+  alerts: Record<string, unknown> | null;
+  alerts_enabled: boolean;
 }
 
 const platforms: Platform[] = [
@@ -87,6 +101,9 @@ export default function DashboardPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [matching, setMatching] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<AutoStatus | null>(null);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [autoMessage, setAutoMessage] = useState("");
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
@@ -108,6 +125,49 @@ export default function DashboardPage() {
     if (user) void Promise.resolve().then(fetchProfiles);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const fetchAutoStatus = async () => {
+    try {
+      const res = await api.get("/jobs/auto-scrape/status");
+      setAutoStatus(res.data);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    if (user) {
+      api
+        .get("/jobs/auto-scrape/status")
+        .then((res) => {
+          if (!cancelled) setAutoStatus(res.data);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const handleAutoScrape = async () => {
+    if (autoRunning) return;
+    setAutoRunning(true);
+    setAutoMessage("");
+    try {
+      const res = await api.post("/jobs/auto-scrape/run");
+      if (res.data.started) {
+        setAutoMessage("Auto-scrape started — it may take a few minutes depending on how many skills you have");
+      } else {
+        setAutoMessage(res.data.reason || "Auto-scrape already running");
+      }
+      setTimeout(fetchAutoStatus, 2000);
+    } catch (err) {
+      setAutoMessage(`Error: ${apiDetail(err, "Failed to start auto-scrape")}`);
+    } finally {
+      setAutoRunning(false);
+    }
+  };
 
   const handleScrape = async () => {
     const platform = platforms.find((p) => p.id === selectedPlatform);
@@ -341,6 +401,55 @@ export default function DashboardPage() {
                 View all in Browse Jobs
                 <ArrowRight className="size-4" />
               </Link>
+            </div>
+          )}
+
+          {autoStatus && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:50ms]">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className={`flex size-8 items-center justify-center rounded-lg ${autoStatus.enabled ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"}`}>
+                    <Clock className="size-4" />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Auto-Scrape</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {autoStatus.enabled
+                        ? `Every ${autoStatus.interval_hours || 12}h based on your top skills`
+                        : "Disabled — set AUTO_SCRAPE_ENABLED=true to enable"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleAutoScrape}
+                  disabled={autoRunning}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-emerald-600 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
+                >
+                  {autoRunning ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-3.5" />
+                  )}
+                  {autoRunning ? "Running..." : "Run now"}
+                </button>
+              </div>
+
+              {autoMessage && (
+                <p className={`mb-3 text-xs ${autoMessage.startsWith("Error") ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {autoMessage}
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400 dark:text-slate-500">
+                {autoStatus.last_run && (
+                  <span>Last run: {new Date(autoStatus.last_run).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}</span>
+                )}
+                {autoStatus.last_counts?.added != null && (
+                  <span>Added: <span className="font-medium text-slate-600 dark:text-slate-300">{autoStatus.last_counts.added}</span></span>
+                )}
+                {autoStatus.running && <span className="animate-pulse text-emerald-500">Running now...</span>}
+                <span>Email alerts: <span className={`font-medium ${autoStatus.alerts_enabled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`}>{autoStatus.alerts_enabled ? "configured" : "not configured"}</span></span>
+              </div>
             </div>
           )}
         </div>

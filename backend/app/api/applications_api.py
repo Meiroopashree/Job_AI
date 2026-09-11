@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -136,6 +136,70 @@ def list_applications(
     return {
         "applications": [_serialize(db, a) for a in apps],
         "counts": grouped,
+    }
+
+
+@router.get("/stats")
+def application_stats(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    apps = db.query(Application).filter(Application.user_id == user.id).all()
+
+    total = len(apps)
+    counts = {s: 0 for s in sorted(VALID_STATUSES)}
+    for a in apps:
+        s = a.status or "saved"
+        counts[s] = counts.get(s, 0) + 1
+
+    saved = counts.get("saved", 0)
+    applied = counts.get("applied", 0)
+    interviews = counts.get("interview", 0)
+    offers = counts.get("offer", 0)
+    rejected = counts.get("rejected", 0)
+
+    now = datetime.now(timezone.utc)
+
+    def _pct(num: int, den: int) -> float:
+        return round((num / den) * 100, 1) if den else 0.0
+
+    conversions = {
+        "saved_to_applied": _pct(applied, saved),
+        "applied_to_interview": _pct(interviews, applied),
+        "interview_to_offer": _pct(offers, interviews),
+        "applied_to_offer": _pct(offers, applied),
+    }
+
+    job_ids = list({a.job_id for a in apps})
+    jobs = db.query(Job).filter(Job.id.in_(job_ids)).all() if job_ids else []
+    company_map = {}
+    for job in jobs:
+        name = (job.company or "").strip() or "Unknown"
+        company_map[name] = company_map.get(name, 0) + 1
+    top_companies = sorted(company_map.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    activity: dict[str, int] = {}
+    for i in range(13, -1, -1):
+        d = (now - timedelta(days=i)).date()
+        activity[d.isoformat()] = 0
+    for a in apps:
+        if a.created_at:
+            d = a.created_at.date() if hasattr(a.created_at, "date") else a.created_at
+            key = d.isoformat()
+            if key in activity:
+                activity[key] = activity.get(key, 0) + 1
+
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+
+    return {
+        "total": total,
+        "counts": counts,
+        "conversions": conversions,
+        "this_week": sum(1 for a in apps if a.created_at and a.created_at >= week_ago),
+        "this_month": sum(1 for a in apps if a.created_at and a.created_at >= month_ago),
+        "top_companies": [{"company": n, "count": c} for n, c in top_companies],
+        "activity": [{"date": k, "count": v} for k, v in sorted(activity.items())],
     }
 
 

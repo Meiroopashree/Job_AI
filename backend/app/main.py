@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from app.api.resume_api import router as resume_router
 from app.api.job_api import router as job_router
 from app.api.match_api import router as match_router
@@ -13,12 +15,43 @@ from app.api.ats_api import router as ats_router
 from app.api.applications_api import router as applications_router
 from app.api.generate_api import router as generate_router
 from app.db.init_db import init_db
+from app.services import auto_scrape_service
+
+scheduler = None
+
+
+def start_scheduler():
+    global scheduler
+    if not auto_scrape_service.is_enabled():
+        print("[scheduler] Auto-scrape disabled, skipping scheduler")
+        return
+    interval_h = auto_scrape_service.interval_hours()
+    scheduler = BackgroundScheduler(timezone="UTC")
+    scheduler.add_job(
+        auto_scrape_service.run_auto_scrape,
+        "interval",
+        hours=interval_h,
+        id="auto_scrape",
+        max_instances=1,
+        coalesce=True,
+    )
+    scheduler.start()
+    print(f"[scheduler] Auto-scrape started (every {interval_h}h)")
+
+
+def stop_scheduler():
+    global scheduler
+    if scheduler:
+        scheduler.shutdown(wait=False)
+        scheduler = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    start_scheduler()
     yield
+    stop_scheduler()
 
 
 origins_env = os.getenv("CORS_ORIGINS", "http://localhost:3000")
@@ -60,6 +93,8 @@ def root():
             "/jobs/",
             "/jobs/stats",
             "/jobs/backfill",
+            "/jobs/auto-scrape/status",
+            "/jobs/auto-scrape/run",
             "/jobs/{job_id}",
             "/match/{profile_id}",
             "/ats/check/{profile_id}",

@@ -9,12 +9,15 @@ import { apiDetail } from "@/lib/apiError";
 import {
   ArrowLeft,
   ArrowUpRight,
+  BarChart3,
   Briefcase,
   Building2,
   ClipboardList,
   MapPin,
+  Target,
   Trash2,
   SearchX,
+  TrendingUp,
 } from "lucide-react";
 
 const STATUSES = ["saved", "applied", "interview", "offer", "rejected"] as const;
@@ -65,6 +68,21 @@ interface Application {
   } | null;
 }
 
+interface AppStats {
+  total: number;
+  counts: Record<string, number>;
+  conversions: {
+    saved_to_applied: number;
+    applied_to_interview: number;
+    interview_to_offer: number;
+    applied_to_offer: number;
+  };
+  this_week: number;
+  this_month: number;
+  top_companies: { company: string; count: number }[];
+  activity: { date: string; count: number }[];
+}
+
 export default function ApplicationsPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -73,14 +91,19 @@ export default function ApplicationsPage() {
   const [filter, setFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState<AppStats | null>(null);
 
   const fetchApps = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/applications");
-      setApplications(res.data.applications || []);
-      setCounts(res.data.counts || {});
+      const [appsRes, statsRes] = await Promise.all([
+        api.get("/applications"),
+        api.get("/applications/stats").catch(() => ({ data: null })),
+      ]);
+      setApplications(appsRes.data.applications || []);
+      setCounts(appsRes.data.counts || {});
+      setStats(statsRes.data || null);
     } catch (err) {
       setError(apiDetail(err, "Failed to load applications"));
     } finally {
@@ -155,6 +178,116 @@ export default function ApplicationsPage() {
           </Link>
         </div>
       </div>
+
+      {!loading && stats && stats.total > 0 && (
+        <div className="mb-8 space-y-6 rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="size-5 text-slate-400" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Overview</h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {([
+              { label: "Total", value: stats.total, color: "text-blue-600 bg-blue-50 dark:bg-blue-950/40", icon: BarChart3 },
+              { label: "Applied", value: stats.counts?.applied || 0, color: "text-amber-600 bg-amber-50 dark:bg-amber-950/40", icon: Target },
+              { label: "Interviews", value: stats.counts?.interview || 0, color: "text-purple-600 bg-purple-50 dark:bg-purple-950/40", icon: TrendingUp },
+              { label: "Offers", value: stats.counts?.offer || 0, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40", icon: Target },
+            ] as const).map(({ label, value, color, icon: Icon }) => (
+              <div key={label} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${color}`}>
+                  <Icon className="size-4" />
+                </span>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{label}</p>
+                  <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">Funnel</h3>
+              <div className="space-y-2">
+                {(["saved", "applied", "interview", "offer", "rejected"] as const).map((s) => {
+                  const n = stats.counts?.[s] || 0;
+                  const pct = stats.total ? (n / stats.total) * 100 : 0;
+                  const barColor: Record<string, string> = {
+                    saved: "bg-blue-400", applied: "bg-amber-400", interview: "bg-purple-400", offer: "bg-emerald-400", rejected: "bg-red-400",
+                  };
+                  return (
+                    <div key={s} className="flex items-center gap-3 text-sm">
+                      <span className="w-20 text-slate-500 dark:text-slate-400 capitalize">{s}</span>
+                      <div className="flex-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                        <div
+                          className={`h-2.5 rounded-full transition-all ${barColor[s]}`}
+                          style={{ width: `${Math.max(pct, n > 0 ? 3 : 0)}%` }}
+                        />
+                      </div>
+                      <span className="w-10 text-right font-medium tabular-nums text-slate-700 dark:text-slate-200">{n}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
+                <span>Saved→Applied <span className="text-slate-700 dark:text-slate-200">{stats.conversions.saved_to_applied}%</span></span>
+                <span>Applied→Interview <span className="text-slate-700 dark:text-slate-200">{stats.conversions.applied_to_interview}%</span></span>
+                <span>Interview→Offer <span className="text-slate-700 dark:text-slate-200">{stats.conversions.interview_to_offer}%</span></span>
+                <span>Applied→Offer <span className="text-slate-700 dark:text-slate-200">{stats.conversions.applied_to_offer}%</span></span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Top Companies</h3>
+                {stats.top_companies.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {stats.top_companies.map(({ company, count }) => (
+                      <div key={company} className="flex items-center justify-between rounded-lg bg-slate-50/60 px-3 py-2 text-sm dark:bg-slate-800/40">
+                        <span className="flex items-center gap-2 truncate text-slate-900 dark:text-white">
+                          <Building2 className="size-3.5 shrink-0 text-slate-400" />
+                          {company}
+                        </span>
+                        <span className="ml-2 shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400">No data yet</p>
+                )}
+              </div>
+
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Last 14 days</h3>
+                <div className="flex items-end gap-1 h-16">
+                  {stats.activity.map(({ date, count }) => {
+                    const maxC = Math.max(...stats.activity.map((a) => a.count), 1);
+                    const h = (count / maxC) * 100;
+                    return (
+                      <div key={date} className="group relative flex-1">
+                        <div className="flex h-16 items-end justify-center">
+                          <div
+                            className={`w-full rounded-t-sm transition-all ${count > 0 ? "bg-blue-400" : "bg-slate-200 dark:bg-slate-700"}`}
+                            style={{ height: `${Math.max(count > 0 ? h : 4, 4)}%` }}
+                          />
+                        </div>
+                        <span className="pointer-events-none absolute -top-6 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-slate-900 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-slate-100 dark:text-slate-900">
+                          {date.slice(5)}: {count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-1 text-center text-[11px] text-slate-400">
+                  This week {stats.this_week} &middot; This month {stats.this_month}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-6 flex flex-wrap gap-2">
         {tabs.map((tab) => {

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timezone
@@ -12,6 +13,8 @@ from app.services.job_normalizer import normalize_job, extract_skills
 from app.services.job_service import save_job, deduplicate_jobs
 from app.scraper.linkedin_scraper import scrape_linkedin_jobs
 from app.scraper.indeed_scraper import scrape_indeed_jobs
+from app.models.user_model import User
+from app.auth.jwt_handler import get_current_user
 
 router = APIRouter()
 
@@ -245,6 +248,18 @@ def backfill_job_descriptions(limit: int = 20):
         }
     finally:
         db.close()
+
+
+@router.get("/auto-scrape/status")
+def auto_scrape_status():
+    from app.services.auto_scrape_service import get_status
+    return get_status()
+
+
+@router.post("/auto-scrape/run")
+def trigger_auto_scrape(user: User = Depends(get_current_user)):
+    from app.services.auto_scrape_service import trigger_auto_scrape
+    return trigger_auto_scrape()
 
 
 @router.get("/{job_id}")
