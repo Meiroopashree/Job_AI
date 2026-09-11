@@ -125,7 +125,7 @@ def _do_auto_scrape() -> dict:
         for term in terms:
             for platform, fn_name in (("linkedin", "linkedin"), ("indeed", "indeed")):
                 try:
-                    raw_jobs = _scrrape_platform(platform, term, country)
+                    raw_jobs = _scrape_platform(platform, term, country)
                 except Exception as e:
                     errors.append(f"{platform}:{term}: {str(e)[:200]}")
                     continue
