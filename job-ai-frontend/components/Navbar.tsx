@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
-import { Menu, X, LayoutDashboard, Upload, FileText } from "lucide-react";
+import { Menu, X, LayoutDashboard, Upload, FileText, Briefcase } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/jobs", label: "Browse Jobs", icon: Briefcase },
   { href: "/upload", label: "Upload Resume", icon: Upload },
   { href: "/ats", label: "ATS Check", icon: FileText },
 ];

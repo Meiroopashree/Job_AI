@@ -55,6 +55,7 @@ def root():
             "/jobs/scrape",
             "/jobs/",
             "/jobs/stats",
+            "/jobs/backfill",
             "/jobs/{job_id}",
             "/match/{profile_id}",
             "/ats/check/{profile_id}",
