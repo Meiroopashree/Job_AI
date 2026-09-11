@@ -49,6 +49,8 @@ export default function BrowseJobsPage() {
   const [totalJobs, setTotalJobs] = useState(0);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillMsg, setBackfillMsg] = useState("");
+  const [descFilling, setDescFilling] = useState(false);
+  const [descFillMsg, setDescFillMsg] = useState("");
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -100,6 +102,30 @@ export default function BrowseJobsPage() {
     }
   };
 
+  const handleDescBackfill = async () => {
+    setDescFilling(true);
+    setDescFillMsg("");
+    try {
+      const res = await api.post("/jobs/backfill/descriptions", null, {
+        params: { limit: 20 },
+      });
+      const d = res.data;
+      setDescFillMsg(
+        d?.message || "Fetched missing descriptions"
+      );
+      if (typeof d?.updated === "number" && typeof d?.failed === "number" && typeof d?.remaining === "number") {
+        setDescFillMsg(
+          `${d.updated} updated, ${d.skipped ?? 0} skipped, ${d.failed} failed · ${d.remaining} remaining. Run again to fetch more.`
+        );
+      }
+      fetchJobs();
+    } catch (err) {
+      setDescFillMsg(apiDetail(err, "Failed to fetch descriptions"));
+    } finally {
+      setDescFilling(false);
+    }
+  };
+
   if (isLoading || !user) return null;
 
   return (
@@ -115,19 +141,35 @@ export default function BrowseJobsPage() {
               : "All jobs scraped from your searches"}
           </p>
         </div>
-        <button
-          onClick={handleBackfill}
-          disabled={backfilling}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-        >
-          <RefreshCw className={`size-4 ${backfilling ? "animate-spin" : ""}`} />
-          Re-scan job skills
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleBackfill}
+            disabled={backfilling}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <RefreshCw className={`size-4 ${backfilling ? "animate-spin" : ""}`} />
+            Re-scan job skills
+          </button>
+          <button
+            onClick={handleDescBackfill}
+            disabled={descFilling}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <RefreshCw className={`size-4 ${descFilling ? "animate-spin" : ""}`} />
+            Fetch missing descriptions
+          </button>
+        </div>
       </div>
 
       {backfillMsg && (
         <div className="mb-4 animate-pop rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
           {backfillMsg}
+        </div>
+      )}
+
+      {descFillMsg && (
+        <div className="mb-4 animate-pop rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-600 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400">
+          {descFillMsg}
         </div>
       )}
 

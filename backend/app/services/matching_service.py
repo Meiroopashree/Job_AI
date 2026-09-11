@@ -63,7 +63,7 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
         else:
             final_score_percent = round(similarity * 35, 2)
 
-        if final_score_percent < 60:
+        if final_score_percent < 30:
             continue
 
         explanation = generate_match_explanation(
