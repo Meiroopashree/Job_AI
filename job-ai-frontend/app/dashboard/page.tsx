@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
@@ -40,6 +40,7 @@ interface AutoStatus {
   errors: string[];
   alerts: Record<string, unknown> | null;
   alerts_enabled: boolean;
+  current_step: string | null;
 }
 
 const platforms: Platform[] = [
@@ -127,12 +128,19 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const pollInFlightRef = useRef(false);
+  const prevRunningRef = useRef(false);
+
   const fetchAutoStatus = async () => {
+    if (pollInFlightRef.current) return;
+    pollInFlightRef.current = true;
     try {
       const res = await api.get("/jobs/auto-scrape/status");
       setAutoStatus(res.data);
     } catch {
       // ignore
+    } finally {
+      pollInFlightRef.current = false;
     }
   };
 
@@ -150,6 +158,25 @@ export default function DashboardPage() {
       cancelled = true;
     };
   }, [user]);
+
+  useEffect(() => {
+    const isRunning = !!autoStatus?.running;
+    if (prevRunningRef.current && !isRunning) {
+      const added = autoStatus?.last_counts?.added;
+      setAutoMessage(
+        added != null && added > 0
+          ? `Auto-scrape finished — added ${added} new job${added === 1 ? "" : "s"}.`
+          : "Auto-scrape finished — no new jobs found this time. This happens when the same listings are already saved."
+      );
+    }
+    prevRunningRef.current = isRunning;
+  }, [autoStatus]);
+
+  useEffect(() => {
+    if (!autoStatus?.running) return;
+    const id = setInterval(() => void fetchAutoStatus(), 3000);
+    return () => clearInterval(id);
+  }, [autoStatus?.running]);
 
   const handleAutoScrape = async () => {
     if (autoRunning) return;
@@ -416,15 +443,15 @@ export default function DashboardPage() {
                 </div>
                 <button
                   onClick={handleAutoScrape}
-                  disabled={autoRunning}
+                  disabled={autoRunning || autoStatus?.running}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-emerald-600 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
                 >
-                  {autoRunning ? (
+                  {autoRunning || autoStatus?.running ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (
                     <RefreshCw className="size-3.5" />
                   )}
-                  {autoRunning ? "Running..." : "Run now"}
+                  {autoRunning || autoStatus?.running ? "Running..." : "Run now"}
                 </button>
               </div>
 
@@ -441,7 +468,9 @@ export default function DashboardPage() {
                 {autoStatus.last_counts?.added != null && (
                   <span>Added: <span className="font-medium text-slate-600 dark:text-slate-300">{autoStatus.last_counts.added}</span></span>
                 )}
-                {autoStatus.running && <span className="animate-pulse text-emerald-500">Running now...</span>}
+                {autoStatus.running && (
+                  <span className="animate-pulse text-emerald-500">{autoStatus.current_step || "Running now..."}</span>
+                )}
                 <span>Email alerts: <span className={`font-medium ${autoStatus.alerts_enabled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`}>{autoStatus.alerts_enabled ? "configured" : "not configured"}</span></span>
               </div>
             </div>

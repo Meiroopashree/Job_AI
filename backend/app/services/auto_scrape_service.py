@@ -35,7 +35,14 @@ _status = {
     "last_counts": {},
     "errors": [],
     "alerts": None,
+    "current_step": None,
+    "updated_at": None,
 }
+
+
+def _set_step(step):
+    _status["current_step"] = step
+    _status["updated_at"] = datetime.now(timezone.utc).isoformat()
 
 
 def is_enabled() -> bool:
@@ -124,6 +131,7 @@ def _do_auto_scrape() -> dict:
 
         for term in terms:
             for platform, fn_name in (("linkedin", "linkedin"), ("indeed", "indeed")):
+                _set_step(f"Scraping {platform} for '{term}'...")
                 try:
                     raw_jobs = _scrape_platform(platform, term, country)
                 except Exception as e:
@@ -131,6 +139,7 @@ def _do_auto_scrape() -> dict:
                     continue
 
                 counts[platform] += len(raw_jobs)
+                _set_step(f"Saving {len(raw_jobs)} jobs from {platform} for '{term}' (added so far: {len(new_ids)})")
                 for raw in raw_jobs:
                     try:
                         normalized = normalize_job(raw)
@@ -145,6 +154,7 @@ def _do_auto_scrape() -> dict:
         counts["added"] = len(new_ids)
 
         if new_ids:
+            _set_step("Checking matches for new jobs...")
             alerts = send_new_match_digests(db, new_ids)
     finally:
         db.close()
@@ -216,6 +226,7 @@ def send_new_match_digests(db, new_job_ids: list) -> dict:
         lines = payload["lines"]
         if not lines:
             continue
+        _set_step(f"Sending alert email to {payload['email']}...")
         subject = f"JobAI — {len(lines)} new job match{'es' if len(lines) != 1 else ''} for you"
         body_lines = [
             "We found new jobs matching your profile:\n",
@@ -264,6 +275,7 @@ def run_auto_scrape() -> dict:
         _refresh_static_status()
         _status["running"] = True
         _status["errors"] = []
+        _set_step("Starting auto-scrape...")
         result = _do_auto_scrape()
         _status["running"] = False
         _status["last_run"] = datetime.now(timezone.utc).isoformat()
@@ -271,11 +283,15 @@ def run_auto_scrape() -> dict:
         _status["last_counts"] = result.get("counts", {})
         _status["errors"] = result.get("errors", [])[:10]
         _status["alerts"] = result.get("alerts")
+        _status["current_step"] = None
+        _status["updated_at"] = datetime.now(timezone.utc).isoformat()
         result["status"] = _status["last_status"]
         return result
     except Exception as e:
         _status["running"] = False
         _status["last_status"] = f"failed: {e}"
+        _status["current_step"] = None
+        _status["updated_at"] = datetime.now(timezone.utc).isoformat()
         print(f"[auto-scrape] error: {e}")
         return {"started": False, "reason": str(e)}
     finally:
