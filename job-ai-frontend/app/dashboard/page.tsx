@@ -355,7 +355,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleScrape}
                   disabled={scraping}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {scraping ? (
                     <>
@@ -571,7 +571,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleMatch}
                   disabled={matching || !selectedProfileId}
-                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   <Sparkles className="size-4" />
                   {matching ? "Matching..." : "Find Matching Jobs"}

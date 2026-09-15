@@ -8,7 +8,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
     <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
       <div className="absolute inset-0 bg-aurora" aria-hidden />
       <div className="absolute inset-0 bg-grid bg-grid-fade" aria-hidden />
-      <div className="absolute -top-32 -left-24 size-96 rounded-full bg-fuchsia-500/20 blur-3xl animate-blob" aria-hidden />
+      <div className="absolute -top-32 -left-24 size-96 rounded-full bg-amber-400/15 blur-3xl animate-blob" aria-hidden />
 
       <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col items-center justify-center gap-10 px-4 py-12 sm:px-6 lg:flex-row lg:gap-20 lg:px-8">
         {/* Brand / value panel */}
@@ -27,7 +27,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
               { icon: ShieldCheck, text: "Your data stays private and secure" },
             ].map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
-                <span className="inline-flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm shadow-fuchsia-600/20">
+                <span className="inline-flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-emerald-600 text-white shadow-sm shadow-emerald-600/20">
                   <Icon className="size-4" />
                 </span>
                 {text}
@@ -36,7 +36,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           </ul>
           <Link
             href="/"
-            className="mt-10 inline-flex items-center gap-1.5 text-sm font-medium text-violet-600 transition-colors hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+            className="mt-10 inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 transition-colors hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300"
           >
             Back to homepage
             <ArrowRight className="size-4" />

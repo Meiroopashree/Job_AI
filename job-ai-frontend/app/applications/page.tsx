@@ -177,7 +177,7 @@ export default function ApplicationsPage() {
         Dashboard
       </button>
 
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-indigo-600 p-7 text-white btn-glow sm:p-9">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-800 p-7 text-white btn-glow sm:p-9">
         <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "22px 22px" }} aria-hidden />

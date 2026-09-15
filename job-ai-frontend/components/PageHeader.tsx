@@ -27,7 +27,7 @@ export function PageHeader({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-indigo-600 p-7 text-white btn-glow animate-fade-up sm:p-9",
+        "relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800 p-7 text-white btn-glow animate-fade-up sm:p-9",
         className
       )}
     >
