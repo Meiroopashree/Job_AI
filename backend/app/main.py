@@ -1,5 +1,6 @@
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,9 +35,10 @@ def start_scheduler():
         id="auto_scrape",
         max_instances=1,
         coalesce=True,
+        next_run_time=datetime.now(timezone.utc),
     )
     scheduler.start()
-    print(f"[scheduler] Auto-scrape started (every {interval_h}h)")
+    print(f"[scheduler] Auto-scrape started (now, then every {interval_h}h)")
 
 
 def stop_scheduler():
