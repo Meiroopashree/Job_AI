@@ -97,7 +97,7 @@ export default function LoginPage() {
           type="submit"
           disabled={loading}
           size="lg"
-          className="h-11 w-full bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-semibold shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="h-11 w-full bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-semibold shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           {loading ? (
             <>
@@ -114,7 +114,7 @@ export default function LoginPage() {
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
+          className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400"
         >
           Sign up
         </Link>

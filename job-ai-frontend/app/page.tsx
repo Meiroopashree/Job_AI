@@ -74,16 +74,16 @@ export default function Home() {
       {/* Hero */}
       <section className="relative">
         <div className="absolute inset-0 bg-grid bg-grid-fade" aria-hidden />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 size-[480px] rounded-full bg-blue-500/20 blur-3xl animate-blob" aria-hidden />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 size-[480px] rounded-full bg-indigo-500/20 blur-3xl animate-blob" aria-hidden />
         <div className="absolute top-24 -left-24 size-72 rounded-full bg-indigo-500/20 blur-3xl animate-blob [animation-delay:-6s]" aria-hidden />
         <div className="absolute top-40 -right-24 size-72 rounded-full bg-sky-400/20 blur-3xl animate-blob [animation-delay:-11s]" aria-hidden />
 
         <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-20 sm:px-6 sm:pt-32 sm:pb-28 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-blue-50/70 px-3.5 py-1.5 text-xs font-medium text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400 animate-fade-up">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-indigo-50/70 px-3.5 py-1.5 text-xs font-medium text-indigo-600 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-400 animate-fade-up">
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-blue-500 opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-blue-500" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-indigo-500 opacity-60" />
+                <span className="relative inline-flex size-2 rounded-full bg-indigo-500" />
               </span>
               AI-Powered Job Matching
             </div>
@@ -100,7 +100,7 @@ export default function Home() {
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 animate-fade-up [animation-delay:300ms]">
               <Link
                 href="/register"
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.02] hover:shadow-blue-600/40 active:scale-[0.98] sm:w-auto"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-8 py-3.5 text-base font-semibold text-white shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02] hover:shadow-indigo-600/40 active:scale-[0.98] sm:w-auto"
               >
                 Get started free
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -140,7 +140,7 @@ export default function Home() {
       <section className="border-t border-slate-200/60 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">How it works</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">How it works</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
               From resume to shortlist in three steps
             </h2>
@@ -152,9 +152,9 @@ export default function Home() {
           <div className="mt-14 grid gap-6 sm:grid-cols-3">
             {STEPS.map((item, i) => (
               <Reveal key={item.step} delay={i * 120}>
-                <div className="group relative h-full rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
+                <div className="group relative h-full rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 dark:border-slate-800 dark:bg-slate-900">
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex size-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-950/40 dark:text-blue-400 dark:group-hover:bg-blue-600 dark:group-hover:text-white">
+                    <span className="inline-flex size-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white dark:bg-indigo-950/40 dark:text-indigo-400 dark:group-hover:bg-indigo-600 dark:group-hover:text-white">
                       <item.icon className="size-5" />
                     </span>
                     <span className="text-4xl font-bold text-slate-200/80 dark:text-slate-700">
@@ -175,7 +175,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-grid bg-grid-fade" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">Features</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Features</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
               A smarter job search, end to end
             </h2>
@@ -187,8 +187,8 @@ export default function Home() {
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature, i) => (
               <Reveal key={feature.title} delay={(i % 3) * 100}>
-                <div className="group h-full rounded-2xl border border-slate-200/60 bg-white/80 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/10 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-blue-900">
-                  <span className="inline-flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25">
+                <div className="group h-full rounded-2xl border border-slate-200/60 bg-white/80 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/10 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-indigo-900">
+                  <span className="inline-flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/25">
                     <feature.icon className="size-5" />
                   </span>
                   <h3 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">{feature.title}</h3>
@@ -204,7 +204,7 @@ export default function Home() {
       <section className="border-t border-slate-200/60 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <Reveal>
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-6 py-14 text-center shadow-2xl shadow-blue-600/30">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-500 px-6 py-14 text-center shadow-2xl shadow-indigo-600/30">
               <div className="absolute inset-0 bg-grid bg-grid-fade opacity-30" aria-hidden />
               <div className="absolute -top-20 -right-20 size-64 rounded-full bg-white/10 blur-3xl" aria-hidden />
               <div className="absolute -bottom-24 -left-20 size-64 rounded-full bg-white/10 blur-3xl" aria-hidden />
@@ -212,12 +212,12 @@ export default function Home() {
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                   Ready to find your next role?
                 </h2>
-                <p className="mx-auto mt-3 max-w-xl text-lg text-blue-100">
+                <p className="mx-auto mt-3 max-w-xl text-lg text-indigo-100">
                   Create your profile, upload a resume, and get personalized matches in minutes.
                 </p>
                 <Link
                   href="/register"
-                  className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:scale-[1.03] active:scale-[0.98]"
+                  className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-indigo-700 shadow-lg transition-all hover:scale-[1.03] active:scale-[0.98]"
                 >
                   Create free account
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />

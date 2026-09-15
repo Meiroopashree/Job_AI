@@ -119,7 +119,7 @@ export default function JobsPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="animate-pulse rounded-2xl border border-slate-200/60 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/70"
+              className="animate-pulse surface p-6"
             >
               <div className="flex items-start gap-4">
                 <div className="size-10 rounded-xl bg-slate-200 dark:bg-slate-800" />
@@ -155,7 +155,7 @@ export default function JobsPage() {
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Go to Dashboard
           </button>
@@ -191,7 +191,7 @@ export default function JobsPage() {
                     aria-current={p === page ? "page" : undefined}
                     className={`size-9 rounded-lg text-sm font-medium transition-all ${
                       p === page
-                        ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25"
+                        ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25"
                         : "border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     }`}
                   >

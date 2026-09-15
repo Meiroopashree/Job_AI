@@ -245,7 +245,7 @@ export default function DashboardPage() {
   const selectedPlatformData = platforms.find((p) => p.id === selectedPlatform);
 
   const statCards = [
-    { label: "Total Jobs", value: stats?.total_jobs, icon: Briefcase, color: "text-blue-600 bg-blue-50 dark:bg-blue-950/40" },
+    { label: "Total Jobs", value: stats?.total_jobs, icon: Briefcase, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40" },
     { label: "Jobs Today", value: stats?.jobs_today, icon: TrendingUp, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40" },
     { label: "Resumes", value: profiles.length, icon: FileText, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40" },
     { label: "Scraped Now", value: scrapedJobs.length, icon: Search, color: "text-orange-600 bg-orange-50 dark:bg-orange-950/40" },
@@ -278,7 +278,7 @@ export default function DashboardPage() {
         {statCards.map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
-            className="flex items-center gap-4 rounded-2xl border border-slate-200/60 bg-white/80 p-4 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/70"
+            className="flex items-center gap-4 surface p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
           >
             <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${color}`}>
               <Icon className="size-5" />
@@ -298,9 +298,9 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Scraper */}
         <div className="space-y-6 lg:col-span-3">
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+          <div className="surface p-6 shadow-sm animate-fade-up">
             <div className="mb-5 flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                 <Building2 className="size-5" />
               </span>
               <div>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                   }}
                   className={`flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                     selectedPlatform === platform.id
-                      ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10 dark:bg-blue-950/30"
+                      ? "border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-500/10 dark:bg-indigo-950/30"
                       : "border-slate-200/70 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                   }`}
                 >
@@ -345,7 +345,7 @@ export default function DashboardPage() {
                         type="text"
                         value={fieldValues[field.key] || ""}
                         onChange={(e) => setFieldValues({ ...fieldValues, [field.key]: e.target.value })}
-                        className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="input-base h-11 rounded-lg px-3"
                         placeholder={field.placeholder}
                       />
                     </div>
@@ -355,7 +355,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleScrape}
                   disabled={scraping}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] hover:shadow-blue-600/35 active:scale-[0.99] disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] hover:shadow-indigo-600/35 active:scale-[0.99] disabled:opacity-50"
                 >
                   {scraping ? (
                     <>
@@ -386,12 +386,12 @@ export default function DashboardPage() {
           )}
 
           {scrapedJobs.length > 0 && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+            <div className="surface p-6 shadow-sm animate-fade-up">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                   Scraped Jobs <span className="text-slate-400">({scrapedJobs.length})</span>
                 </h2>
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                   {selectedPlatformData?.name}
                 </span>
               </div>
@@ -400,9 +400,9 @@ export default function DashboardPage() {
                   <Link
                     key={job.id}
                     href={`/jobs/job/${job.id}`}
-                    className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-blue-200 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-blue-900 dark:hover:bg-blue-950/20"
+                    className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/20"
                   >
-                    <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-blue-400">
+                    <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400">
                       <Briefcase className="size-4" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -417,7 +417,7 @@ export default function DashboardPage() {
               </div>
               <Link
                 href="/jobs"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
+                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400"
               >
                 View all in Browse Jobs
                 <ArrowRight className="size-4" />
@@ -426,7 +426,7 @@ export default function DashboardPage() {
           )}
 
           {autoStatus && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:50ms]">
+            <div className="surface p-5 shadow-sm animate-fade-up [animation-delay:50ms]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className={`flex size-8 items-center justify-center rounded-lg ${autoStatus.enabled ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"}`}>
@@ -479,7 +479,7 @@ export default function DashboardPage() {
 
         {/* Resumes + Match */}
         <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:100ms]">
+          <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:100ms]">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <FileText className="size-5 text-slate-400" />
@@ -487,7 +487,7 @@ export default function DashboardPage() {
               </div>
               <Link
                 href="/upload"
-                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+                className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
               >
                 + New
               </Link>
@@ -500,7 +500,7 @@ export default function DashboardPage() {
                     key={p.id}
                     className={`cursor-pointer rounded-xl border p-3 transition-all ${
                       selectedProfileId === p.id
-                        ? "border-blue-500 bg-blue-50 shadow-sm dark:bg-blue-950/20"
+                        ? "border-indigo-500 bg-indigo-50 shadow-sm dark:bg-indigo-950/20"
                         : "border-slate-200/70 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                     }`}
                     onClick={() => setSelectedProfileId(p.id)}
@@ -519,7 +519,7 @@ export default function DashboardPage() {
                         <Link
                           href={`/upload/${p.id}/edit`}
                           onClick={(e) => e.stopPropagation()}
-                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/30"
+                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30"
                           title="Edit"
                         >
                           <Pencil className="size-4" />
@@ -545,7 +545,7 @@ export default function DashboardPage() {
                 <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">No resume uploaded yet</p>
                 <Link
                   href="/upload"
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
                 >
                   Upload Resume
                 </Link>
@@ -571,7 +571,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleMatch}
                   disabled={matching || !selectedProfileId}
-                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   <Sparkles className="size-4" />
                   {matching ? "Matching..." : "Find Matching Jobs"}
@@ -581,19 +581,19 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:200ms]">
+          <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:200ms]">
             <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Quick Tips</h2>
             <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
               <li className="flex gap-2.5">
-                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-blue-500" />
+                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-indigo-500" />
                 Upload a resume first to unlock matching.
               </li>
               <li className="flex gap-2.5">
-                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-blue-500" />
+                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-indigo-500" />
                 Scrape with a focused search term for better matches.
               </li>
               <li className="flex gap-2.5">
-                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-blue-500" />
+                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-indigo-500" />
                 LinkedIn and Indeed may rate-limit frequent requests.
               </li>
             </ul>

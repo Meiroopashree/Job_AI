@@ -407,9 +407,9 @@ export default function ATSPage() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-4">
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+          <div className="surface p-6 shadow-sm animate-fade-up">
             <div className="mb-4 flex items-center gap-2.5">
-              <FileSearch className="size-5 text-blue-500" />
+              <FileSearch className="size-5 text-indigo-500" />
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Select Resume</h2>
             </div>
 
@@ -420,7 +420,7 @@ export default function ATSPage() {
                     key={p.id}
                     className={`cursor-pointer rounded-xl border p-3 transition-all ${
                       selectedProfileId === p.id
-                        ? "border-blue-500 bg-blue-50 shadow-sm dark:bg-blue-950/20"
+                        ? "border-indigo-500 bg-indigo-50 shadow-sm dark:bg-indigo-950/20"
                         : "border-slate-200/70 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
                     }`}
                     onClick={() => { setSelectedProfileId(p.id); setResult(null); setError(""); }}
@@ -441,7 +441,7 @@ export default function ATSPage() {
                 <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">No resume uploaded yet</p>
                 <button
                   onClick={() => router.push("/upload")}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
                 >
                   <Plus className="size-4" />
                   Upload Resume
@@ -454,7 +454,7 @@ export default function ATSPage() {
                 <button
                   onClick={handleCheck}
                   disabled={loading || !selectedProfileId}
-                  className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -491,7 +491,7 @@ export default function ATSPage() {
           {loading && (
             <div className="space-y-4 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/70">
+                <div key={i} className="surface p-6">
                   <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/3 mb-4" />
                   <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2" />
                   <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
@@ -512,7 +512,7 @@ export default function ATSPage() {
 
           {result && (
             <>
-              <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+              <div className="surface p-6 shadow-sm animate-fade-up">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Overall ATS Score</h2>
                   {atsResumeScore != null && (
@@ -586,7 +586,7 @@ export default function ATSPage() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:100ms]">
+              <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:100ms]">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Score Breakdown</h2>
                 <div className="space-y-4">
                   {result.breakdown && Object.entries(result.breakdown).map(([key, value]) => (
@@ -614,12 +614,12 @@ export default function ATSPage() {
               </div>
 
               {result.suggestions && result.suggestions.length > 0 && (
-                <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up [animation-delay:200ms]">
+                <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:200ms]">
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Suggestions to Improve</h2>
                   <ul className="space-y-2">
                     {result.suggestions.map((s, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 text-xs font-bold">
+                        <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 text-xs font-bold">
                           {i + 1}
                         </span>
                         {s}
@@ -633,7 +633,7 @@ export default function ATSPage() {
                 <button
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {generating ? (
                     <>
@@ -651,7 +651,7 @@ export default function ATSPage() {
 
               {result.ats_resume_data && typeof result.ats_resume_data === "object" && !Array.isArray(result.ats_resume_data) && (
                 <>
-                  <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+                  <div className="overflow-hidden surface shadow-sm animate-fade-up">
                     <div className="flex items-center justify-between border-b border-slate-200/70 p-4 dark:border-slate-800">
                       <div className="flex items-center gap-3">
                         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
@@ -673,7 +673,7 @@ export default function ATSPage() {
                         <button
                           onClick={handleDownloadPdf}
                           disabled={downloading}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/25 transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
                         >
                           <Download className="size-4" />
                           {downloading ? "Downloading..." : "Download PDF"}

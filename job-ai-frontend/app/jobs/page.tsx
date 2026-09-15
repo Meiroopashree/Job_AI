@@ -154,7 +154,7 @@ export default function BrowseJobsPage() {
         }
       />
 
-      <details className="group/ops mb-6 rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+      <details className="group/ops mb-6 surface p-3 shadow-sm">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
           <span className="flex items-center gap-1.5">
             <Wrench className="size-3.5" />
@@ -189,13 +189,13 @@ export default function BrowseJobsPage() {
       )}
 
       {descFillMsg && (
-        <div className="mb-4 animate-pop rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-600 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400">
+        <div className="mb-4 animate-pop rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm text-indigo-600 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-400">
           {descFillMsg}
         </div>
       )}
 
       {/* Filters */}
-      <div className="mb-6 grid gap-3 rounded-2xl border border-slate-200/60 bg-white/80 p-4 shadow-sm backdrop-blur sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900/70">
+      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-4">
         <div className="sm:col-span-2">
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Search
@@ -210,7 +210,7 @@ export default function BrowseJobsPage() {
                 if (e.key === "Enter") handleSearch();
               }}
               placeholder="Title, company or keyword"
-              className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="input-base h-11 rounded-lg pl-9 pr-3"
             />
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function BrowseJobsPage() {
               if (e.key === "Enter") handleSearch();
             }}
             placeholder="e.g. Stripe"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="input-base h-11 rounded-lg px-3"
           />
         </div>
         <div>
@@ -241,12 +241,12 @@ export default function BrowseJobsPage() {
               if (e.key === "Enter") handleSearch();
             }}
             placeholder="e.g. Dallas, TX"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="input-base h-11 rounded-lg px-3"
           />
         </div>
         <button
           onClick={handleSearch}
-          className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <Search className="size-4" />
           Search
@@ -284,7 +284,7 @@ export default function BrowseJobsPage() {
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Go to Dashboard
           </button>
@@ -297,7 +297,7 @@ export default function BrowseJobsPage() {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="group rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/70"
+                className="group surface p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
@@ -307,7 +307,7 @@ export default function BrowseJobsPage() {
                     <div className="min-w-0">
                       <Link
                         href={`/jobs/job/${job.id}`}
-                        className="truncate text-base font-semibold text-slate-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                        className="truncate text-base font-semibold text-slate-900 transition-colors hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
                       >
                         {job.title || "Untitled Position"}
                       </Link>
@@ -329,7 +329,7 @@ export default function BrowseJobsPage() {
                         href={job.apply_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+                        className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
                       >
                         Apply
                         <ArrowRight className="size-3.5" />
@@ -338,7 +338,7 @@ export default function BrowseJobsPage() {
                     <Link
                       href={`/jobs/job/${job.id}`}
                       aria-label="View details"
-                      className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-300 text-slate-500 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-blue-800 dark:hover:text-blue-400"
+                      className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-300 text-slate-500 transition-colors hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-indigo-800 dark:hover:text-indigo-400"
                     >
                       <Search className="size-4" />
                     </Link>
@@ -350,7 +350,7 @@ export default function BrowseJobsPage() {
                     {job.skills.slice(0, 8).map((s: string, i: number) => (
                       <span
                         key={i}
-                        className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400"
+                        className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:border-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-400"
                       >
                         {s}
                       </span>
@@ -391,7 +391,7 @@ export default function BrowseJobsPage() {
                     aria-current={p === page ? "page" : undefined}
                     className={`size-9 rounded-lg text-sm font-medium transition-all ${
                       p === page
-                        ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25"
+                        ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25"
                         : "border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     }`}
                   >

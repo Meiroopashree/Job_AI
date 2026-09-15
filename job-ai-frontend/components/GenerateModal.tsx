@@ -103,7 +103,7 @@ export default function GenerateModal({
               onClick={() => handleGenerate(key)}
               className={`flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                 tab === key
-                  ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                  ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
                   : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
@@ -116,7 +116,7 @@ export default function GenerateModal({
         <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(85vh - 130px)" }}>
           {loading && (
             <div className="flex flex-col items-center justify-center py-16">
-              <LoaderCircle className="size-8 animate-spin text-blue-500" />
+              <LoaderCircle className="size-8 animate-spin text-indigo-500" />
               <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Generating with AI...</p>
             </div>
           )}

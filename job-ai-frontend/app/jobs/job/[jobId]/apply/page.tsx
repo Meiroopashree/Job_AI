@@ -236,7 +236,7 @@ export default function ApplyAutoFillPage() {
 
       {!loading && job && (
         <>
-          <div className="relative overflow-hidden rounded-3xl border border-indigo-200/50 bg-gradient-to-br from-indigo-600 via-blue-600 to-violet-600 p-7 text-white shadow-xl shadow-blue-600/20 dark:border-indigo-900 dark:shadow-none sm:p-9">
+          <div className="relative overflow-hidden rounded-3xl border border-indigo-200/50 bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-7 text-white shadow-xl shadow-indigo-600/20 dark:border-indigo-900 dark:shadow-none sm:p-9">
             <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl" aria-hidden />
             <div className="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
             <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "22px 22px" }} aria-hidden />
@@ -322,7 +322,7 @@ export default function ApplyAutoFillPage() {
               </p>
               <button
                 onClick={() => router.push("/upload")}
-                className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 Upload Resume
               </button>
@@ -338,7 +338,7 @@ export default function ApplyAutoFillPage() {
                   onClick={() => setSelectedId(p.id)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                     selectedId === p.id
-                      ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-700"
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-700"
                       : "border-slate-200 bg-white/80 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300"
                   }`}
                 >
@@ -353,7 +353,7 @@ export default function ApplyAutoFillPage() {
             <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
               <div className="space-y-5">
                 {profileLoading && (
-                  <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/70">
+                  <div className="surface p-6">
                     <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                       <LoaderCircle className="size-4 animate-spin" />
                       Pre-filling from {selectedProfile?.file_name || "your resume"}…
@@ -366,10 +366,10 @@ export default function ApplyAutoFillPage() {
                     {appProfile.groups.map((group) => {
                       const Icon = GROUP_ICONS[group.id] || User;
                       return (
-                        <div key={group.id} className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+                        <div key={group.id} className="overflow-hidden surface shadow-sm animate-fade-up">
                           <div className="flex items-start justify-between gap-3 border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
                             <div className="flex items-center gap-3">
-                              <span className="flex size-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                              <span className="flex size-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                                 <Icon className="size-4" />
                               </span>
                               <div>
@@ -403,7 +403,7 @@ export default function ApplyAutoFillPage() {
                                         </span>
                                       )}
                                       {edited && (
-                                        <span className="flex items-center gap-1 rounded bg-blue-50 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-blue-500 dark:bg-blue-950/40 dark:text-blue-400">
+                                        <span className="flex items-center gap-1 rounded bg-indigo-50 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-indigo-500 dark:bg-indigo-950/40 dark:text-indigo-400">
                                           <Sparkles className="size-2.5" /> edited
                                         </span>
                                       )}
@@ -436,7 +436,7 @@ export default function ApplyAutoFillPage() {
                                       onChange={(e) => updateField(field.id, e.target.value)}
                                       rows={3}
                                       placeholder={field.placeholder}
-                                      className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                      className="input-base w-full resize-none rounded-lg px-3 py-2 text-sm"
                                     />
                                   ) : (
                                     <input
@@ -444,7 +444,7 @@ export default function ApplyAutoFillPage() {
                                       value={fields[field.id] || ""}
                                       onChange={(e) => updateField(field.id, e.target.value)}
                                       placeholder={field.placeholder}
-                                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                                      className="input-base h-10 rounded-lg px-3 text-sm"
                                     />
                                   )}
                                 </div>
@@ -460,7 +460,7 @@ export default function ApplyAutoFillPage() {
 
               <aside className="space-y-4 lg:sticky lg:top-24 lg:h-fit">
                 {selectedProfile && (
-                  <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+                  <div className="surface p-5 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       Auto-filling from
                     </p>
@@ -470,9 +470,9 @@ export default function ApplyAutoFillPage() {
                   </div>
                 )}
 
-                <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+                <div className="surface p-5 shadow-sm">
                   <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                    <ClipboardCheck className="size-4 text-blue-500" />
+                    <ClipboardCheck className="size-4 text-indigo-500" />
                     Ready to apply?
                   </h3>
                   <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -481,7 +481,7 @@ export default function ApplyAutoFillPage() {
                   <button
                     onClick={copyAll}
                     disabled={!appProfile}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                   >
                     <Copy className="size-4" />
                     Copy all answers

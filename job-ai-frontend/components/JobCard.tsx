@@ -37,7 +37,7 @@ interface JobCardProps {
 const STATUS_OPTIONS = ["saved", "applied", "interview", "offer", "rejected"] as const;
 
 const STATUS_COLORS: Record<string, string> = {
-  saved: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
+  saved: "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800",
   applied: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
   interview: "bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800",
   offer: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
@@ -139,7 +139,7 @@ export default function JobCard({ item, profileId }: JobCardProps) {
 
   return (
     <>
-      <div className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900/70">
+      <div className="group relative overflow-hidden surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5">
         <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tone.ring} transition-opacity opacity-70 group-hover:opacity-100`} aria-hidden />
 
         <div className="p-6">

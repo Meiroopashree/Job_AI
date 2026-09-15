@@ -28,10 +28,10 @@ const STATUS_STYLES: Record<
   { chip: string; dot: string; label: string; bar: string }
 > = {
   saved: {
-    chip: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
-    dot: "bg-blue-500",
+    chip: "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800",
+    dot: "bg-indigo-500",
     label: "Saved",
-    bar: "bg-blue-400",
+    bar: "bg-indigo-400",
   },
   applied: {
     chip: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
@@ -93,7 +93,7 @@ interface AppStats {
 }
 
 const STAT_CARDS: { key: string; label: string; icon: typeof Target; tint: string }[] = [
-  { key: "total", label: "Total tracked", icon: ClipboardList, tint: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400" },
+  { key: "total", label: "Total tracked", icon: ClipboardList, tint: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" },
   { key: "applied", label: "Applied", icon: Briefcase, tint: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400" },
   { key: "interview", label: "Interviews", icon: Target, tint: "bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400" },
   { key: "offer", label: "Offers", icon: CheckCircle2, tint: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400" },
@@ -177,7 +177,7 @@ export default function ApplicationsPage() {
         Dashboard
       </button>
 
-      <div className="relative overflow-hidden rounded-3xl border border-indigo-200/50 bg-gradient-to-br from-indigo-600 via-blue-600 to-violet-600 p-7 text-white shadow-xl shadow-blue-600/20 dark:border-indigo-900 dark:shadow-none sm:p-9">
+      <div className="relative overflow-hidden rounded-3xl border border-indigo-200/50 bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-7 text-white shadow-xl shadow-indigo-600/20 dark:border-indigo-900 dark:shadow-none sm:p-9">
         <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "22px 22px" }} aria-hidden />
@@ -242,10 +242,10 @@ export default function ApplicationsPage() {
       </div>
 
       {!loading && stats && stats.total > 0 && (
-        <div className="mt-8 space-y-6 rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 animate-fade-up">
+        <div className="mt-8 space-y-6 surface p-6 shadow-sm animate-fade-up">
           <div className="flex items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
-              <BarChart3 className="size-5 text-blue-500" />
+              <BarChart3 className="size-5 text-indigo-500" />
               Overview
             </h2>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -313,7 +313,7 @@ export default function ApplicationsPage() {
                           <Building2 className="size-3.5 shrink-0 text-slate-400" />
                           {company}
                         </span>
-                        <span className="ml-2 shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                        <span className="ml-2 shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                           {count}
                         </span>
                       </div>
@@ -334,7 +334,7 @@ export default function ApplicationsPage() {
                       <div key={date} className="group relative flex-1">
                         <div className="flex h-16 items-end justify-center">
                           <div
-                            className={`w-full rounded-t-sm transition-all ${count > 0 ? "bg-blue-400" : "bg-slate-200 dark:bg-slate-700"}`}
+                            className={`w-full rounded-t-sm transition-all ${count > 0 ? "bg-indigo-400" : "bg-slate-200 dark:bg-slate-700"}`}
                             style={{ height: `${Math.max(count > 0 ? h : 4, 4)}%` }}
                           />
                         </div>
@@ -366,7 +366,7 @@ export default function ApplicationsPage() {
               onClick={() => setFilter(tab.key)}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                 active
-                  ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25"
+                  ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25"
                   : "border border-slate-200 bg-white/80 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
@@ -433,7 +433,7 @@ export default function ApplicationsPage() {
             return (
               <div
                 key={app.id}
-                className="group flex flex-col gap-3 rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/70 lg:flex-row lg:items-center"
+                className="group flex flex-col gap-3 surface p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md lg:flex-row lg:items-center"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start gap-3">
@@ -441,7 +441,7 @@ export default function ApplicationsPage() {
                     <div className="min-w-0">
                       <Link
                         href={`/jobs/job/${app.job_id}`}
-                        className="truncate text-base font-semibold text-slate-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                        className="truncate text-base font-semibold text-slate-900 transition-colors hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
                       >
                         {app.job?.title || `Job #${app.job_id}`}
                       </Link>
@@ -495,7 +495,7 @@ export default function ApplicationsPage() {
                       href={app.job.apply_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-400"
+                      className="inline-flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors hover:bg-indigo-600 hover:text-white dark:bg-slate-800 dark:text-slate-400"
                       title="Open job posting"
                     >
                       <ArrowUpRight className="size-4" />

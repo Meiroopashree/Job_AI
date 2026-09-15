@@ -118,7 +118,7 @@ export default function JobDetailPage() {
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Go to Dashboard
           </button>
@@ -187,7 +187,7 @@ export default function JobDetailPage() {
           />
 
           {job.skills?.length > 0 && (
-            <div className="mb-5 rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="mb-5 surface p-6 shadow-sm">
               <p className="mb-2.5 text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Skills
               </p>
@@ -195,7 +195,7 @@ export default function JobDetailPage() {
                 {job.skills.map((s: string, i: number) => (
                   <span
                     key={i}
-                    className="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400"
+                    className="rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 dark:border-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-400"
                   >
                     {s}
                   </span>
@@ -204,7 +204,7 @@ export default function JobDetailPage() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+          <div className="surface p-6 shadow-sm">
             <p className="mb-2.5 text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Description
             </p>

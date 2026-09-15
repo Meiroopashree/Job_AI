@@ -126,7 +126,7 @@ export default function UploadPage() {
         }
       />
 
-      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8 dark:border-slate-800 dark:bg-slate-900/70">
+      <div className="surface p-6 shadow-sm sm:p-8">
         {/* Steps */}
         <div className="mb-6 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500">
           {["Upload", "AI Analysis", "Review"].map((step, i) => (
@@ -135,7 +135,7 @@ export default function UploadPage() {
               <span
                 className={
                   (result ? i <= 2 : loading ? i <= 1 : i === 0)
-                    ? "text-blue-600 dark:text-blue-400"
+                    ? "text-indigo-600 dark:text-indigo-400"
                     : ""
                 }
               >
@@ -163,15 +163,15 @@ export default function UploadPage() {
           onDrop={onDrop}
           className={`relative cursor-pointer overflow-hidden rounded-xl border-2 border-dashed p-10 text-center transition-all ${
             dragging
-              ? "scale-[1.01] border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+              ? "scale-[1.01] border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30"
               : file
-                ? "border-blue-400 bg-blue-50/60 dark:bg-blue-950/20"
-                : "border-slate-300 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
+                ? "border-indigo-400 bg-indigo-50/60 dark:bg-indigo-950/20"
+                : "border-slate-300 hover:border-indigo-400 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
           }`}
         >
           {file ? (
             <div className="animate-pop">
-              <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+              <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
                 <FileText className="size-7" />
               </span>
               <p className="mt-3 truncate text-base font-semibold text-slate-900 dark:text-white">
@@ -194,7 +194,7 @@ export default function UploadPage() {
             </div>
           ) : (
             <div>
-              <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25">
+              <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/25">
                 <UploadCloud className="size-7" />
               </span>
               <p className="mt-4 text-base font-medium text-slate-700 dark:text-slate-300">
@@ -224,7 +224,7 @@ export default function UploadPage() {
           <button
             onClick={uploadResume}
             disabled={loading}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -257,7 +257,7 @@ export default function UploadPage() {
             {skills.length > 0 && (
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                  <Sparkles className="size-4 text-blue-500" />
+                  <Sparkles className="size-4 text-indigo-500" />
                   Extracted Skills
                   <span className="text-xs font-normal text-slate-400">({skills.length})</span>
                 </h3>
@@ -265,7 +265,7 @@ export default function UploadPage() {
                   {skills.map((s: string, i: number) => (
                     <span
                       key={i}
-                      className="animate-pop rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400"
+                      className="animate-pop rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-400"
                       style={{ animationDelay: `${i * 40}ms` }}
                     >
                       {s}
@@ -278,14 +278,14 @@ export default function UploadPage() {
             {experience.length > 0 && (
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                  <Briefcase className="size-4 text-blue-500" />
+                  <Briefcase className="size-4 text-indigo-500" />
                   Experience
                 </h3>
                 <div className="space-y-2">
                   {experience.map((exp, i) => (
                     <div
                       key={i}
-                      className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-blue-200 dark:border-slate-800 dark:bg-slate-800/40"
+                      className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-indigo-200 dark:border-slate-800 dark:bg-slate-800/40"
                     >
                       <p className="font-medium text-slate-900 dark:text-white text-sm">{exp.title}</p>
                       <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
@@ -300,7 +300,7 @@ export default function UploadPage() {
             {education.length > 0 && (
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
-                  <GraduationCap className="size-4 text-blue-500" />
+                  <GraduationCap className="size-4 text-indigo-500" />
                   Education
                 </h3>
                 <div className="space-y-1">
@@ -317,7 +317,7 @@ export default function UploadPage() {
             <div className="flex flex-col gap-3 border-t border-slate-200/70 pt-5 sm:flex-row dark:border-slate-800">
               <button
                 onClick={() => router.push(`/jobs/${result.profile_id}`)}
-                className="group inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                className="group inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
               >
                 View Job Matches
                 <ArrowRight className="size-4 opacity-60 transition-transform group-hover:translate-x-0.5" />

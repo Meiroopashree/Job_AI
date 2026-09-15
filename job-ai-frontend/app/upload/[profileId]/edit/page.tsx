@@ -159,9 +159,9 @@ export default function EditResumePage() {
 
       {data && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+          <div className="surface p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2.5">
-              <Sparkles className="size-5 text-blue-500" />
+              <Sparkles className="size-5 text-indigo-500" />
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Skills</h2>
             </div>
             <label className="mb-1.5 block text-sm text-slate-500 dark:text-slate-400">
@@ -171,7 +171,7 @@ export default function EditResumePage() {
               type="text"
               value={skillsInput}
               onChange={(e) => setSkillsInput(e.target.value)}
-              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="input-base h-11 rounded-lg px-3"
               placeholder="React, Python, TypeScript, ..."
             />
             {skillPreview.length > 0 && (
@@ -179,7 +179,7 @@ export default function EditResumePage() {
                 {skillPreview.map((s, i) => (
                   <span
                     key={`${s}-${i}`}
-                    className="animate-pop rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400"
+                    className="animate-pop rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-400"
                     style={{ animationDelay: `${i * 30}ms` }}
                   >
                     {s}
@@ -190,9 +190,9 @@ export default function EditResumePage() {
           </div>
 
           {personalInfo && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="surface p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-2.5">
-                <User className="size-5 text-blue-500" />
+                <User className="size-5 text-indigo-500" />
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Personal Info</h2>
               </div>
               <div className="grid gap-2 text-sm sm:grid-cols-2">
@@ -214,14 +214,14 @@ export default function EditResumePage() {
           )}
 
           {data.experience && data.experience.length > 0 && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="surface p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-2.5">
-                <Briefcase className="size-5 text-blue-500" />
+                <Briefcase className="size-5 text-indigo-500" />
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Experience</h2>
               </div>
               <div className="space-y-3">
                 {data.experience.map((exp, i) => (
-                  <div key={i} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-blue-200 dark:border-slate-800 dark:bg-slate-800/40">
+                  <div key={i} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-indigo-200 dark:border-slate-800 dark:bg-slate-800/40">
                     <p className="font-medium text-slate-900 dark:text-white">{exp.title}</p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       {exp.company} &middot; {exp.start_date} - {exp.end_date || "Present"}
@@ -233,9 +233,9 @@ export default function EditResumePage() {
           )}
 
           {data.education && data.education.length > 0 && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="surface p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-2.5">
-                <GraduationCap className="size-5 text-blue-500" />
+                <GraduationCap className="size-5 text-indigo-500" />
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Education</h2>
               </div>
               <div className="space-y-2">
@@ -254,7 +254,7 @@ export default function EditResumePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
               {saving ? (
                 <>
