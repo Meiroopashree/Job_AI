@@ -246,7 +246,7 @@ export default function DashboardPage() {
 
   const statCards = [
     { label: "Total Jobs", value: stats?.total_jobs, icon: Briefcase, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40" },
-    { label: "Jobs Today", value: stats?.jobs_today, icon: TrendingUp, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40" },
+    { label: "Jobs Today", value: stats?.jobs_today, icon: TrendingUp, color: "text-honey-600 bg-honey-50 dark:bg-honey-400/10" },
     { label: "Resumes", value: profiles.length, icon: FileText, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40" },
     { label: "Scraped Now", value: scrapedJobs.length, icon: Search, color: "text-orange-600 bg-orange-50 dark:bg-orange-950/40" },
   ];
@@ -355,7 +355,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleScrape}
                   disabled={scraping}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-terra-600 to-rust-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {scraping ? (
                     <>
@@ -444,7 +444,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleAutoScrape}
                   disabled={autoRunning || autoStatus?.running}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-emerald-600 to-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-terra-600 to-rust-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50"
                 >
                   {autoRunning || autoStatus?.running ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
@@ -571,7 +571,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleMatch}
                   disabled={matching || !selectedProfileId}
-                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                  className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-terra-600 to-rust-600 px-5 py-3 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   <Sparkles className="size-4" />
                   {matching ? "Matching..." : "Find Matching Jobs"}

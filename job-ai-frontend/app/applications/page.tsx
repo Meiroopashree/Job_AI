@@ -177,7 +177,7 @@ export default function ApplicationsPage() {
         Dashboard
       </button>
 
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-800 p-7 text-white btn-glow sm:p-9">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-terra-700 via-rust-600 to-terra-800 p-7 text-white btn-glow sm:p-9">
         <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "22px 22px" }} aria-hidden />
@@ -188,7 +188,7 @@ export default function ApplicationsPage() {
               <ClipboardList className="size-3.5" />
               JOB TRACKER
             </span>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl font-heading">
               {applications.length > 0
                 ? `${applications.length} job${applications.length === 1 ? "" : "s"} in motion`
                 : "Your job applications"}
@@ -223,13 +223,13 @@ export default function ApplicationsPage() {
                   <p className="mt-1 text-xs font-medium text-white/70">applications tracked</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold tabular-nums text-emerald-300">{progressToOffer}%</p>
+                  <p className="text-2xl font-bold tabular-nums text-honey-200">{progressToOffer}%</p>
                   <p className="text-xs font-medium text-white/70">offers won</p>
                 </div>
               </div>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/15">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-300 transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-honey-300 to-terra-300 transition-all"
                   style={{ width: `${progressToOffer}%` }}
                 />
               </div>

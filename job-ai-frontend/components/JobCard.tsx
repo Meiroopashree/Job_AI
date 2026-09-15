@@ -61,9 +61,9 @@ function stripHtml(input: unknown): string {
 function matchTone(pct: number) {
   if (pct >= 80) {
     return {
-      ring: "from-emerald-500 to-teal-500",
+      ring: "from-emerald-500 to-green-500",
       chip: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
-      bar: "bg-gradient-to-r from-emerald-500 to-teal-500",
+      bar: "bg-gradient-to-r from-emerald-500 to-green-500",
       label: "High match",
     };
   }

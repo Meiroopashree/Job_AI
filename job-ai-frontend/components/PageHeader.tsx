@@ -27,7 +27,7 @@ export function PageHeader({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800 p-7 text-white btn-glow animate-fade-up sm:p-9",
+        "relative overflow-hidden rounded-3xl bg-gradient-to-br from-terra-700 via-rust-700 to-terra-800 p-7 text-white btn-glow animate-fade-up sm:p-9",
         className
       )}
     >
@@ -47,7 +47,7 @@ export function PageHeader({
               {eyebrow}
             </span>
           )}
-          <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl font-heading">{title}</h1>
           {subtitle && (
             <p className="mt-3 text-sm leading-relaxed text-white/85">{subtitle}</p>
           )}
