@@ -69,7 +69,7 @@ def send_test_alert(
     if not is_configured():
         raise HTTPException(
             status_code=400,
-            detail="Email alerts are not configured yet (SMTP env vars missing on the server)",
+            detail="Email alerts are not configured yet (email env vars missing on the server)",
         )
 
     ok, error = send_email_with_error(
@@ -93,7 +93,7 @@ def send_alerts_now(
     if not is_configured():
         raise HTTPException(
             status_code=400,
-            detail="Email alerts are not configured yet (SMTP env vars missing on the server)",
+            detail="Email alerts are not configured yet (email env vars missing on the server)",
         )
 
     profile = (
