@@ -133,6 +133,7 @@ export default function DashboardPage() {
   const [recJobs, setRecJobs] = useState<RecommendedJob[]>([]);
   const [recLoading, setRecLoading] = useState(false);
   const [recProfileFound, setRecProfileFound] = useState(true);
+  const [recProfileName, setRecProfileName] = useState<string>("");
   const [alertsStatus, setAlertsStatus] = useState<AlertsStatus | null>(null);
   const [alertsBusy, setAlertsBusy] = useState<"test" | "send" | null>(null);
   const [alertMsg, setAlertMsg] = useState("");
@@ -161,9 +162,12 @@ export default function DashboardPage() {
   const fetchRecommended = async () => {
     setRecLoading(true);
     try {
-      const res = await api.get("/jobs/recommended", { params: { limit: 5, days: 30 } });
+      const res = await api.get("/jobs/recommended", {
+        params: { limit: 5, days: 30, profile_id: selectedProfileId || undefined },
+      });
       setRecJobs(res.data.results || []);
       setRecProfileFound(res.data.profile_found !== false);
+      setRecProfileName(res.data.profile?.file_name || "");
     } catch {
       setRecJobs([]);
     } finally {
@@ -173,7 +177,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) void Promise.resolve().then(fetchRecommended);
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, selectedProfileId]);
 
   const fetchAlertsStatus = async () => {
     try {
@@ -570,7 +575,11 @@ export default function DashboardPage() {
                 </span>
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recommended for you</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Best matches from the last 30 days</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {recProfileFound && recProfileName
+                      ? `Matched from ${recProfileName}`
+                      : "Best matches from the last 30 days"}
+                  </p>
                 </div>
               </div>
               <Link

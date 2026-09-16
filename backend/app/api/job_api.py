@@ -182,6 +182,7 @@ def list_jobs(
 @router.get("/recommended")
 def recommended_jobs(
     user: User = Depends(get_current_user),
+    profile_id: Optional[int] = None,
     limit: int = 5,
     days: int = 30,
 ):
@@ -189,14 +190,18 @@ def recommended_jobs(
 
     db = SessionLocal()
     try:
-        profile = (
-            db.query(Profile)
-            .filter(Profile.user_id == user.id)
-            .order_by(Profile.id.desc())
-            .first()
-        )
+        profile_query = db.query(Profile).filter(Profile.user_id == user.id)
+        if profile_id:
+            profile_query = profile_query.filter(Profile.id == profile_id)
+        profile = profile_query.order_by(Profile.id.desc()).first()
         if not profile:
-            return {"profile_found": False, "results": [], "total_jobs": 0, "total_pages": 0}
+            return {
+                "profile_found": False,
+                "profile": None,
+                "results": [],
+                "total_jobs": 0,
+                "total_pages": 0,
+            }
 
         cutoff = datetime.now(timezone.utc) - timedelta(days=max(1, min(days, 365)))
         applied_ids = {
@@ -230,8 +235,10 @@ def recommended_jobs(
             if j.id not in applied_ids
         ]
 
+        profile_info = {"id": profile.id, "file_name": profile.file_name or ""}
+
         if not candidates:
-            return {"profile_found": True, "results": [], "total_jobs": 0, "total_pages": 0}
+            return {"profile_found": True, "profile": profile_info, "results": [], "total_jobs": 0, "total_pages": 0}
 
         profile_data = {
             "skills": profile.skills or [],
@@ -242,7 +249,7 @@ def recommended_jobs(
         }
 
         matched = match_profile_to_jobs(profile_data, candidates, page=1, limit=max(1, min(limit, 10)))
-        return {"profile_found": True, **matched}
+        return {"profile_found": True, "profile": profile_info, **matched}
     finally:
         db.close()
 
