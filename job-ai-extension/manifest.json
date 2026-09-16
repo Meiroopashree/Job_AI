@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "JobAI Auto-Fill",
+  "version": "1.0.0",
+  "description": "Auto-fill LinkedIn and Indeed application forms from your JobAI resume profile. Review before you submit.",
+  "permissions": ["storage", "clipboardRead", "activeTab", "tabs", "scripting"],
+  "host_permissions": ["https://jobai-api-zs2f.onrender.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JobAI Auto-Fill"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/jobs/*",
+        "https://*.linkedin.com/*apply*",
+        "https://*.indeed.com/*"
+      ],
+      "js": ["fill-engine.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

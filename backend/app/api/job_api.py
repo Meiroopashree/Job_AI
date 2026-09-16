@@ -2,13 +2,15 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import time
 
 from sqlalchemy import or_
 
 from app.db.database import SessionLocal
 from app.models.job_model import Job
+from app.models.profile_model import Profile
+from app.models.application_model import Application
 from app.services.job_normalizer import normalize_job, extract_skills
 from app.services.job_service import save_job, deduplicate_jobs
 from app.scraper.linkedin_scraper import scrape_linkedin_jobs
@@ -173,6 +175,74 @@ def list_jobs(
                 for j in jobs
             ],
         }
+    finally:
+        db.close()
+
+
+@router.get("/recommended")
+def recommended_jobs(
+    user: User = Depends(get_current_user),
+    limit: int = 5,
+    days: int = 30,
+):
+    from app.services.matching_service import match_profile_to_jobs
+
+    db = SessionLocal()
+    try:
+        profile = (
+            db.query(Profile)
+            .filter(Profile.user_id == user.id)
+            .order_by(Profile.id.desc())
+            .first()
+        )
+        if not profile:
+            return {"profile_found": False, "results": [], "total_jobs": 0, "total_pages": 0}
+
+        cutoff = datetime.now(timezone.utc) - timedelta(days=max(1, min(days, 365)))
+        applied_ids = {
+            row[0]
+            for row in db.query(Application.job_id).filter(Application.user_id == user.id).all()
+        }
+        jobs = (
+            db.query(Job)
+            .filter(Job.created_at >= cutoff)
+            .order_by(Job.created_at.desc())
+            .limit(200)
+            .all()
+        )
+        candidates = [
+            {
+                "id": j.id,
+                "title": j.title,
+                "company": j.company,
+                "location": j.location,
+                "description": j.description,
+                "skills": j.skills or [],
+                "apply_url": j.apply_url,
+                "salary_min": j.salary_min,
+                "salary_max": j.salary_max,
+                "salary_interval": j.salary_interval,
+                "salary_currency": j.salary_currency,
+                "date_posted": j.date_posted,
+                "source": j.source,
+            }
+            for j in jobs
+            if j.id not in applied_ids
+        ]
+
+        if not candidates:
+            return {"profile_found": True, "results": [], "total_jobs": 0, "total_pages": 0}
+
+        profile_data = {
+            "skills": profile.skills or [],
+            "experience": profile.experience,
+            "education": profile.education,
+            "years_of_experience": profile.years_of_experience,
+            "profile_summary": (profile.profile_summary or "") if isinstance(profile.profile_summary, str) else "",
+        }
+
+        matched = match_profile_to_jobs(profile_data, candidates, page=1, limit=max(1, min(limit, 10)))
+        return {"profile_found": True, **matched}
     finally:
         db.close()
 

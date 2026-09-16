@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { margin: 0; font: 13px/1.5 -apple-system, "Segoe UI", sans-serif; color: #fbf5eb; background: #2a1c17; width: 340px; }
+      .wrap { padding: 14px; }
+      h1 { margin: 0 0 4px; font-size: 15px; }
+      .sub { margin: 0 0 12px; font-size: 12px; color: #c9b8a6; }
+      label { display: block; margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #d8c6b2; }
+      input[type="text"], input[type="password"], select { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 8px; border: 1px solid #5a4232; background: #1f1612; color: #fbf5eb; font: 13px -apple-system, "Segoe UI", sans-serif; }
+      input::placeholder { color: #8a7663; }
+      button { width: 100%; padding: 8px 10px; margin-top: 10px; border: 0; border-radius: 8px; font: 600 13px -apple-system, "Segoe UI", sans-serif; cursor: pointer; }
+      .primary { background: #c0653a; color: #fff; }
+      .primary:hover { background: #cf7448; }
+      .secondary { background: #3a2a20; color: #fbf5eb; }
+      .secondary:hover { background: #47342a; }
+      button:disabled { opacity: .5; cursor: default; }
+      #status { margin-top: 10px; padding: 8px 10px; border-radius: 8px; font-size: 12px; background: #1f1612; color: #c9b8a6; min-height: 34px; box-sizing: border-box; white-space: pre-wrap; }
+      #profileRow { display: none; }
+      .hint { font-size: 11px; color: #8a7663; margin-top: 4px; line-height: 1.4; }
+      .sep { height: 1px; background: #3a2a20; margin: 12px 0 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>JobAI Auto-Fill</h1>
+      <p class="sub">Fills job application forms from your JobAI profile. Review before you submit.</p>
+
+      <label for="token">JobAI API token</label>
+      <input type="password" id="token" autocomplete="off" placeholder="Paste your token from Settings" />
+      <div class="hint">Copy it from the JobAI site (Settings &rarr; API token / account).</div>
+
+      <label for="jobId">Job ID</label>
+      <input type="text" id="jobId" placeholder="JobAI job id, e.g. 42" />
+      <div class="hint">The id in a JobAI job URL: yoursite.com/jobs/job/&lt;id&gt;. Auto-detected on JobAI job pages.</div>
+
+      <button id="loadBtn" class="primary">Load profile data</button>
+
+      <div id="profileRow">
+        <label for="profileSel">Profile</label>
+        <select id="profileSel"></select>
+      </div>
+
+      <div class="sep"></div>
+
+      <button id="fillBtn" class="secondary" disabled>Fill this page</button>
+
+      <div id="status">Open a LinkedIn or Indeed application page, then load your profile data.</div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

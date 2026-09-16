@@ -32,6 +32,7 @@ import {
   buildApplyProfile,
   formatAllAnswers,
 } from "@/lib/applyFields";
+import GenerateModal from "@/components/GenerateModal";
 
 interface JobDetail {
   id: number;
@@ -71,6 +72,8 @@ const STEPS = [
   { n: "3", label: "Copy into the form" },
 ];
 
+const AUTOFILL_BOOKMARKLET = `javascript:(function(){try{window.__JOBAI_AUTOFILL_LOADED__=false;}catch(e){}var d=document,s=d.createElement('script');s.src='https://job-ai-frontend-beryl.vercel.app/autofill.js';d.body.appendChild(s);})();`;
+
 export default function ApplyAutoFillPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -89,6 +92,8 @@ export default function ApplyAutoFillPage() {
   const [toast, setToast] = useState("");
   const [applied, setApplied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fillCopied, setFillCopied] = useState(false);
+  const [showGen, setShowGen] = useState(false);
 
   const showToast = useCallback((message: string) => {
     setToast(message);
@@ -204,6 +209,33 @@ export default function ApplyAutoFillPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const prepareAutofill = async () => {
+    if (!job || !appProfile) return;
+    const payload = {
+      job: {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        apply_url: job.apply_url,
+        source: job.source || "",
+      },
+      profile: {
+        id: selectedId,
+        file_name: selectedProfile?.file_name || "",
+        fields: { ...fields },
+      },
+    };
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload));
+    } catch {
+      // clipboard unavailable in this environment
+    }
+    setFillCopied(true);
+    window.setTimeout(() => setFillCopied(false), 2000);
+    showToast("Auto-fill data ready — open the job form and run the bookmarklet");
   };
 
   if (isLoading || !user) return null;
@@ -509,6 +541,49 @@ export default function ApplyAutoFillPage() {
                       {applied ? "Applied" : saving ? "Saving…" : "Mark applied"}
                     </button>
                   </div>
+                  <button
+                    onClick={() => setShowGen(true)}
+                    disabled={!selectedId}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-sm font-semibold text-purple-600 transition-colors hover:bg-purple-100 disabled:opacity-50 dark:border-purple-800 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-950/50"
+                  >
+                    <Sparkles className="size-4" />
+                    Generate cover letter
+                  </button>
+                </div>
+
+                <div className="surface p-5 shadow-sm">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                    <Wand2 className="size-4 text-indigo-500" />
+                    Auto-fill on the job site
+                  </h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                    Copy your answers, then run the JobAI auto-fill bookmarklet on the
+                    job&apos;s form (LinkedIn, Indeed and most other ATS sites). It only
+                    fills fields — it never submits.
+                  </p>
+                  <button
+                    onClick={prepareAutofill}
+                    disabled={!appProfile}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400 dark:hover:bg-indigo-950/60"
+                  >
+                    {fillCopied ? <Check className="size-4" /> : <Wand2 className="size-4" />}
+                    {fillCopied ? "Fill data copied" : "Copy auto-fill data"}
+                  </button>
+                  <p className="mt-3 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Drag this into your bookmarks bar
+                  </p>
+                  <a
+                    href={AUTOFILL_BOOKMARKLET}
+                    className="mt-1.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-indigo-600 dark:hover:text-indigo-400"
+                  >
+                    <Wand2 className="size-3.5" />
+                    JobAI Autofill
+                  </a>
+                  <p className="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+                    Open the job posting, click your bookmarklet, then review
+                    everything before submitting. Prefer no bookmark? Use the JobAI
+                    browser extension instead.
+                  </p>
                 </div>
               </aside>
             </div>
@@ -520,6 +595,16 @@ export default function ApplyAutoFillPage() {
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-pop rounded-full bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-2xl dark:bg-white dark:text-slate-900">
           {toast}
         </div>
+      )}
+
+      {showGen && selectedId && job && (
+        <GenerateModal
+          jobId={job.id}
+          profileId={selectedId}
+          jobTitle={job.title}
+          company={job.company}
+          onClose={() => setShowGen(false)}
+        />
       )}
     </div>
   );

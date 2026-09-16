@@ -15,6 +15,8 @@ from app.api.profile_api import router as profile_router
 from app.api.ats_api import router as ats_router
 from app.api.applications_api import router as applications_router
 from app.api.generate_api import router as generate_router
+from app.api.apply_api import router as apply_router
+from app.api.alerts_api import router as alerts_router
 from app.db.init_db import init_db
 from app.services import auto_scrape_service
 
@@ -77,6 +79,8 @@ app.include_router(match_router, prefix="/match", tags=["Match"])
 app.include_router(ats_router)
 app.include_router(applications_router)
 app.include_router(generate_router)
+app.include_router(apply_router)
+app.include_router(alerts_router)
 
 
 @app.get("/", tags=["System"])
@@ -105,6 +109,11 @@ def root():
             "/applications",
             "/generate/cover-letter",
             "/generate/tailored-resume",
+            "/apply/fill-data/{job_id}",
+            "/alerts/status",
+            "/alerts/test",
+            "/alerts/send-now",
+            "/jobs/recommended",
             "/health",
         ],
     }

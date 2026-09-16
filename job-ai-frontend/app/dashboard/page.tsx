@@ -19,6 +19,8 @@ import {
   Search,
   Sparkles,
   Building2,
+  Mail,
+  Send,
 } from "lucide-react";
 import { useStats } from "@/hooks/useStats";
 import { PageHeader, HeroPrimaryButton, HeroSecondaryButton } from "@/components/PageHeader";
@@ -41,6 +43,28 @@ interface AutoStatus {
   alerts: Record<string, unknown> | null;
   alerts_enabled: boolean;
   current_step: string | null;
+}
+
+interface RecommendedJob {
+  job: {
+    id: number;
+    title: string;
+    company: string;
+    location: string;
+    salary_min?: number | null;
+    salary_max?: number | null;
+    salary_interval?: string | null;
+    salary_currency?: string | null;
+    date_posted?: string | null;
+    source?: string | null;
+    apply_url?: string;
+  };
+  match_percentage: number;
+}
+
+interface AlertsStatus {
+  configured: boolean;
+  email: string;
 }
 
 const platforms: Platform[] = [
@@ -106,6 +130,12 @@ export default function DashboardPage() {
   const [autoStatus, setAutoStatus] = useState<AutoStatus | null>(null);
   const [autoRunning, setAutoRunning] = useState(false);
   const [autoMessage, setAutoMessage] = useState("");
+  const [recJobs, setRecJobs] = useState<RecommendedJob[]>([]);
+  const [recLoading, setRecLoading] = useState(false);
+  const [recProfileFound, setRecProfileFound] = useState(true);
+  const [alertsStatus, setAlertsStatus] = useState<AlertsStatus | null>(null);
+  const [alertsBusy, setAlertsBusy] = useState<"test" | "send" | null>(null);
+  const [alertMsg, setAlertMsg] = useState("");
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
@@ -127,6 +157,62 @@ export default function DashboardPage() {
     if (user) void Promise.resolve().then(fetchProfiles);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const fetchRecommended = async () => {
+    setRecLoading(true);
+    try {
+      const res = await api.get("/jobs/recommended", { params: { limit: 5, days: 30 } });
+      setRecJobs(res.data.results || []);
+      setRecProfileFound(res.data.profile_found !== false);
+    } catch {
+      setRecJobs([]);
+    } finally {
+      setRecLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) void Promise.resolve().then(fetchRecommended);
+  }, [user]);
+
+  const fetchAlertsStatus = async () => {
+    try {
+      const res = await api.get("/alerts/status");
+      setAlertsStatus(res.data);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (user) void Promise.resolve().then(fetchAlertsStatus);
+  }, [user]);
+
+  const handleTestAlert = async () => {
+    setAlertsBusy("test");
+    setAlertMsg("");
+    try {
+      const res = await api.post("/alerts/test");
+      setAlertMsg(res.data.message || "Test email sent");
+    } catch (err) {
+      setAlertMsg(`Error: ${apiDetail(err, "Test failed")}`);
+    } finally {
+      setAlertsBusy(null);
+    }
+  };
+
+  const handleSendNow = async () => {
+    setAlertsBusy("send");
+    setAlertMsg("");
+    try {
+      const res = await api.post("/alerts/send-now");
+      setAlertMsg(`${res.data.message || "Digest sent"}${res.data.matches ? ` (${res.data.matches} job${res.data.matches === 1 ? "" : "s"})` : ""}`);
+    } catch (err) {
+      setAlertMsg(`Error: ${apiDetail(err, "Send failed")}`);
+    } finally {
+      setAlertsBusy(null);
+    }
+  };
 
   const pollInFlightRef = useRef(false);
   const prevRunningRef = useRef(false);
@@ -475,6 +561,90 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+
+          <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:100ms]">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-terra-600 to-rust-600 text-white shadow-sm">
+                  <Sparkles className="size-5" />
+                </span>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recommended for you</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Best matches from the last 30 days</p>
+                </div>
+              </div>
+              <Link
+                href="/jobs"
+                className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400"
+              >
+                Browse all
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+
+            {recLoading && (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+                ))}
+              </div>
+            )}
+
+            {!recLoading && !recProfileFound && (
+              <div className="rounded-xl border border-dashed border-slate-300 py-8 text-center dark:border-slate-700">
+                <FileText className="mx-auto size-8 text-slate-300 dark:text-slate-600" />
+                <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Upload or select a resume to unlock recommendations</p>
+                <Link
+                  href="/upload"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
+                >
+                  Upload Resume
+                </Link>
+              </div>
+            )}
+
+            {!recLoading && recProfileFound && recJobs.length === 0 && (
+              <p className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                No strong matches in the last 30 days. Scrape more jobs and check back.
+              </p>
+            )}
+
+            {!recLoading && recJobs.length > 0 && (
+              <div className="hide-scrollbar max-h-96 space-y-2 overflow-y-auto pr-1">
+                {recJobs.map((item) => {
+                  const pct = Math.round(Number(item.match_percentage) || 0);
+                  return (
+                    <Link
+                      key={item.job.id}
+                      href={`/jobs/job/${item.job.id}/apply`}
+                      className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/20"
+                    >
+                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400">
+                        <Briefcase className="size-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{item.job.title}</p>
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          {item.job.company} &middot; {item.job.location}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+                          pct >= 80
+                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                            : pct >= 60
+                              ? "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+                              : "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                        }`}
+                      >
+                        {pct}%
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Resumes + Match */}
@@ -578,6 +748,78 @@ export default function DashboardPage() {
                   <ArrowRight className="size-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
+            )}
+          </div>
+
+          <div className="surface p-6 shadow-sm animate-fade-up [animation-delay:150ms]">
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                <Mail className="size-5" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Email Job Alerts</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Digest of new matching jobs</p>
+              </div>
+            </div>
+
+            <div className="mb-3 flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Status</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {alertsStatus ? (alertsStatus.configured ? "Configured" : "Not configured") : "Checking…"}
+                </p>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                  alertsStatus?.configured
+                    ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                    : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                }`}
+              >
+                <span className={`size-1.5 rounded-full ${alertsStatus?.configured ? "bg-emerald-500" : "bg-slate-400"}`} />
+                {alertsStatus?.configured ? "Active" : "Off"}
+              </span>
+            </div>
+
+            {alertsStatus?.email && (
+              <p className="mb-3 truncate text-xs text-slate-500 dark:text-slate-400">
+                Digests go to <span className="font-medium text-slate-700 dark:text-slate-300">{alertsStatus.email}</span>
+              </p>
+            )}
+
+            <p className="text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+              Auto-scrape sends a digest when it finds new jobs. Test your inbox or send a digest right now.
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={handleTestAlert}
+                disabled={!alertsStatus?.configured || alertsBusy !== null}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                {alertsBusy === "test" ? <LoaderCircle className="size-3.5 animate-spin" /> : <Mail className="size-3.5" />}
+                Send test
+              </button>
+              <button
+                onClick={handleSendNow}
+                disabled={!alertsStatus?.configured || alertsBusy !== null}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                {alertsBusy === "send" ? <LoaderCircle className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+                Digest now
+              </button>
+            </div>
+
+            {!alertsStatus?.configured && (
+              <p className="mt-3 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+                Set SMTP variables on the server (SMTP_HOST, SMTP_USER, SMTP_PASS) to enable email alerts.
+              </p>
+            )}
+
+            {alertMsg && (
+              <p className={`mt-3 text-xs ${alertMsg.startsWith("Error") ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                {alertMsg}
+              </p>
             )}
           </div>
 
