@@ -9,7 +9,7 @@ from app.models.job_model import Job
 from app.models.profile_model import Profile
 from app.models.user_model import User
 from app.auth.jwt_handler import get_current_user
-from app.services.email_notifier import is_configured, send_email
+from app.services.email_notifier import is_configured, send_email, send_email_with_error
 from app.services.matching_service import match_profile_to_jobs
 
 router = APIRouter(prefix="/alerts", tags=["Alerts"])
@@ -72,13 +72,16 @@ def send_test_alert(
             detail="Email alerts are not configured yet (SMTP env vars missing on the server)",
         )
 
-    ok = send_email(
+    ok, error = send_email_with_error(
         user.email,
         "JobAI - test alert",
         "This is a test email from JobAI. Your email job alerts are connected and working.\n\n- JobAI",
     )
     if not ok:
-        raise HTTPException(status_code=502, detail="Failed to send the test email")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to send the test email: {error or 'unknown error'}",
+        )
     return {"message": "Test email sent", "email": user.email}
 
 
@@ -145,9 +148,12 @@ def send_alerts_now(
     subject = f"JobAI - {len(lines)} new job match{'es' if len(lines) != 1 else ''} for you"
     body = "We found jobs matching your profile:\n\n" + "\n".join(lines) + "\n\n- JobAI automatic job alerts"
 
-    ok = send_email(user.email, subject, body)
+    ok, error = send_email_with_error(user.email, subject, body)
     if not ok:
-        raise HTTPException(status_code=502, detail="Failed to send the digest email")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to send the digest email: {error or 'unknown error'}",
+        )
 
     for jid in sent_ids:
         db.add(AlertLog(user_id=user.id, profile_id=profile.id, job_id=jid))

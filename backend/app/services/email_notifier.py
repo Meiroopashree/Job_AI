@@ -15,27 +15,38 @@ def is_configured() -> bool:
     return bool(SMTP_HOST and SMTP_USER and SMTP_PASSWORD)
 
 
-def send_email(to: str, subject: str, body: str) -> bool:
-    if not is_configured():
-        return False
-
+def _send(to: str, subject: str, body: str):
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = SMTP_FROM
     msg["To"] = to
     msg.set_content(body)
 
+    if SMTP_USE_TLS:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+    else:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=20) as server:
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+
+
+def send_email(to: str, subject: str, body: str) -> bool:
+    ok, _ = send_email_with_error(to, subject, body)
+    return ok
+
+
+def send_email_with_error(to: str, subject: str, body: str) -> tuple[bool, str]:
+    if not is_configured():
+        return False, "SMTP is not configured on the server (SMTP_HOST/SMTP_USER/SMTP_PASSWORD missing)"
     try:
-        if SMTP_USE_TLS:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
-                server.starttls(context=ssl.create_default_context())
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-        else:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=20) as server:
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-        return True
+        _send(to, subject, body)
+        return True, ""
     except Exception as e:
-        print(f"[email] send failed to {to}: {e}")
-        return False
+        message = f"{type(e).__name__}: {e}"
+        print(f"[email] send failed to {to}: {message}")
+        return False, message
