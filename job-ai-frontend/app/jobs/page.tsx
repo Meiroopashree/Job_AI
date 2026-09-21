@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Briefcase,
   Building2,
-  ChevronLeft,
   ChevronRight,
   MapPin,
   RefreshCw,
@@ -19,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { Pagination } from "@/components/Pagination";
 
 const PAGE_SIZE = 10;
 
@@ -195,8 +195,8 @@ export default function BrowseJobsPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-4">
-        <div className="sm:col-span-2">
+      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end">
+        <div className="sm:col-span-2 lg:col-span-1">
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Search
           </label>
@@ -246,7 +246,7 @@ export default function BrowseJobsPage() {
         </div>
         <button
           onClick={handleSearch}
-          className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] sm:col-span-2 lg:col-span-1 lg:w-auto"
         >
           <Search className="size-4" />
           Search
@@ -371,43 +371,12 @@ export default function BrowseJobsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200/70 pt-4 sm:flex-row dark:border-slate-800">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Page {page} of {totalPages} &middot; {totalJobs} jobs
-              </p>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                  aria-label="Previous page"
-                  className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    aria-current={p === page ? "page" : undefined}
-                    className={`size-9 rounded-lg text-sm font-medium transition-all ${
-                      p === page
-                        ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25"
-                        : "border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                  aria-label="Next page"
-                  className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              summary={`Page ${page} of ${totalPages} \u00B7 ${totalJobs} jobs`}
+            />
           )}
         </>
       )}

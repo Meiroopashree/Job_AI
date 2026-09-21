@@ -592,7 +592,7 @@ export default function ApplyAutoFillPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-pop rounded-full bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-2xl dark:bg-white dark:text-slate-900">
+        <div className="fixed bottom-6 left-1/2 z-50 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 truncate text-center animate-pop rounded-full bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-2xl dark:bg-white dark:text-slate-900">
           {toast}
         </div>
       )}

@@ -39,7 +39,7 @@ export function Navbar() {
           <div className="flex items-center gap-8">
             <BrandMark />
             {links.length > 0 && (
-              <div className="hidden sm:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-1">
                 {links.map(({ href, label, icon: Icon }) => {
                   const active = pathname === href || pathname.startsWith(`${href}/`);
                   return (
@@ -90,13 +90,13 @@ export function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                  className="hidden lg:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center rounded-lg bg-gradient-to-br from-terra-600 to-rust-600 px-4 py-2 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                  className="hidden lg:inline-flex items-center rounded-lg bg-gradient-to-br from-terra-600 to-rust-600 px-4 py-2 text-sm font-semibold text-white btn-glow ring-1 ring-white/20 transition-transform hover:scale-[1.03] active:scale-[0.98]"
                 >
                   Get started
                 </Link>
@@ -107,7 +107,7 @@ export function Navbar() {
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Toggle menu"
                 aria-expanded={menuOpen}
-                className="sm:hidden rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="lg:hidden rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
               >
                 {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
               </button>
@@ -116,7 +116,7 @@ export function Navbar() {
         </div>
 
         {(menuOpen) && (
-          <div className="sm:hidden space-y-1 pb-4 animate-fade-in">
+          <div className="lg:hidden space-y-1 pb-4 animate-fade-in">
             {user && links.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || pathname.startsWith(`${href}/`);
               return (

@@ -470,7 +470,7 @@ export default function ApplicationsPage() {
                   )}
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2 lg:justify-end">
+                <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
                   <Link
                     href={`/jobs/job/${app.job_id}/apply`}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-400 dark:hover:bg-indigo-950/50"

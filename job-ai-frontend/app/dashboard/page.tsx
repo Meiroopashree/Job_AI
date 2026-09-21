@@ -365,7 +365,7 @@ export default function DashboardPage() {
       />
 
       {/* Stats */}
-      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
         {statCards.map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
@@ -800,7 +800,7 @@ export default function DashboardPage() {
               Auto-scrape sends a digest when it finds new jobs. Test your inbox or send a digest right now.
             </p>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 onClick={handleTestAlert}
                 disabled={!alertsStatus?.configured || alertsBusy !== null}

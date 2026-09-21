@@ -125,7 +125,7 @@ export default function Home() {
             <p className="text-xs font-medium uppercase tracking-widest text-slate-400 dark:text-slate-500">
               Sources live jobs from
             </p>
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <span className="flex items-center gap-2 rounded-xl border border-terra-200/60 bg-white/70 px-5 py-2.5 font-semibold text-slate-700 backdrop-blur shadow-sm dark:border-white/15 dark:bg-white/10 dark:text-slate-200">
                 <span className="size-2 rounded-full bg-[#0a66c2]" />
                 LinkedIn

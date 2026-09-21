@@ -45,7 +45,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
         {/* Form card */}
         <div className="w-full max-w-md animate-fade-up [animation-delay:150ms]">
-          <div className="surface p-8">
+          <div className="surface p-6 sm:p-8">
             {children}
           </div>
         </div>
