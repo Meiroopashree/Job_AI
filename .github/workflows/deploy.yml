@@ -36,6 +36,7 @@ jobs:
         working-directory: job-ai-frontend
         run: |
           npm ci
+          npm install --no-save "lightningcss-linux-x64-gnu@$(node -p "require('lightningcss/package.json').version")"
           npx tsc --noEmit
           npm run lint
           npm run build
