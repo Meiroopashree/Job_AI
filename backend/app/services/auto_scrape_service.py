@@ -8,21 +8,10 @@ from app.models.job_model import Job
 from app.models.profile_model import Profile
 from app.models.user_model import User
 from app.services.email_notifier import is_configured, send_email
-from app.services.job_normalizer import normalize_job
-from app.services.job_service import save_job
 from app.services.matching_service import match_profile_to_jobs
-
-from app.scraper.linkedin_scraper import scrape_linkedin_jobs
-from app.scraper.indeed_scraper import scrape_indeed_jobs
+from app.services.profile_scrape_service import scrape_for_profile
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://job-ai-frontend-beryl.vercel.app")
-
-_GENERIC_SKILLS = {
-    "communication", "leadership", "teamwork", "team player", "collaboration",
-    "problem solving", "problem-solving", "english", "time management",
-    "attention to detail", "adaptability", "critical thinking", "analytical",
-    "project management", "microsoft office", "organization", "presentation",
-}
 
 _run_lock = threading.Lock()
 
@@ -63,21 +52,6 @@ def get_status() -> dict:
     return {**_status, "alerts_enabled": is_configured()}
 
 
-def derive_search_terms(profiles) -> list:
-    terms = []
-    seen = set()
-    for profile in profiles:
-        for skill in (profile.skills or []):
-            s = str(skill).strip().lower()
-            if len(s) < 3 or s in seen or s in _GENERIC_SKILLS:
-                continue
-            seen.add(s)
-            terms.append(s)
-    if not terms:
-        return ["software engineer"]
-    return terms[: max(1, int(os.getenv("AUTO_SCRAPE_MAX_TERMS", "5")))]
-
-
 def _job_dict(job: Job) -> dict:
     return {
         "id": job.id,
@@ -96,24 +70,6 @@ def _job_dict(job: Job) -> dict:
     }
 
 
-def _scrape_platform(platform, term, country):
-    per_term = max(1, min(int(os.getenv("AUTO_SCRAPE_PER_TERM", "10")), 50))
-    if platform == "linkedin":
-        return scrape_linkedin_jobs(
-            search_term=term,
-            location="",
-            results_wanted=per_term,
-            full_description=True,
-        )
-    return scrape_indeed_jobs(
-        search_term=term,
-        location="",
-        country=country,
-        results_wanted=per_term,
-        full_description=True,
-    )
-
-
 def _do_auto_scrape() -> dict:
     db = SessionLocal()
     new_ids = []
@@ -123,33 +79,15 @@ def _do_auto_scrape() -> dict:
 
     try:
         profiles = db.query(Profile).all()
-        terms = derive_search_terms(profiles)
-        counts["terms"] = len(terms)
-        country = os.getenv("AUTO_SCRAPE_COUNTRY", "USA")
-
-        existing_ids = set(row[0] for row in db.query(Job.id).all())
-
-        for term in terms:
-            for platform, fn_name in (("linkedin", "linkedin"), ("indeed", "indeed")):
-                _set_step(f"Scraping {platform} for '{term}'...")
-                try:
-                    raw_jobs = _scrape_platform(platform, term, country)
-                except Exception as e:
-                    errors.append(f"{platform}:{term}: {str(e)[:200]}")
-                    continue
-
-                counts[platform] += len(raw_jobs)
-                _set_step(f"Saving {len(raw_jobs)} jobs from {platform} for '{term}' (added so far: {len(new_ids)})")
-                for raw in raw_jobs:
-                    try:
-                        normalized = normalize_job(raw)
-                        saved = save_job(db, normalized)
-                        counts["scraped"] += 1
-                        if saved.id not in existing_ids:
-                            existing_ids.add(saved.id)
-                            new_ids.append(saved.id)
-                    except Exception as e:
-                        errors.append(f"save failed ({platform}:{term}): {str(e)[:200]}")
+        for profile in profiles:
+            try:
+                ids, c, errs = scrape_for_profile(db, profile)
+                new_ids.extend(ids)
+                for k in counts:
+                    counts[k] += c.get(k, 0)
+                errors.extend(errs)
+            except Exception as e:
+                errors.append(f"profile {profile.id}: {str(e)[:200]}")
 
         counts["added"] = len(new_ids)
 

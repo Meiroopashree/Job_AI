@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timedelta, timezone
+import os
 import time
 
 from sqlalchemy import or_
@@ -28,6 +29,10 @@ class ScrapeRequest(BaseModel):
     country: Optional[str] = None
     results_wanted: Optional[int] = 25
     full_description: Optional[bool] = True
+
+
+class ProfileScrapeRequest(BaseModel):
+    profile_id: Optional[int] = None
 
 
 @router.post("/scrape")
@@ -128,6 +133,7 @@ def list_jobs(
     search: Optional[str] = None,
     company: Optional[str] = None,
     location: Optional[str] = None,
+    posted_days: int = 0,
 ):
     db = SessionLocal()
     try:
@@ -146,6 +152,9 @@ def list_jobs(
             query = query.filter(Job.company.ilike(f"%{company.strip()}%"))
         if location and location.strip():
             query = query.filter(Job.location.ilike(f"%{location.strip()}%"))
+        if posted_days and posted_days > 0:
+            cutoff = datetime.now(timezone.utc) - timedelta(days=posted_days)
+            query = query.filter(Job.created_at >= cutoff)
 
         total_jobs = query.count()
         jobs = query.order_by(Job.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
@@ -251,6 +260,85 @@ def recommended_jobs(
 
         matched = match_profile_to_jobs(profile_data, candidates, page=1, limit=max(1, min(limit, 10)))
         return {"profile_found": True, "profile": profile_info, **matched}
+    finally:
+        db.close()
+
+
+@router.post("/scrape-recommend")
+def scrape_recommend(req: ProfileScrapeRequest, user: User = Depends(get_current_user)):
+    """Scrape fresh jobs tailored to one resume (skills + location), store,
+    and return the best new matches for that resume."""
+    from app.services.matching_service import match_profile_to_jobs
+    from app.services.profile_scrape_service import scrape_for_profile
+
+    db = SessionLocal()
+    try:
+        profile_query = db.query(Profile).filter(Profile.user_id == user.id)
+        if req.profile_id:
+            profile_query = profile_query.filter(Profile.id == req.profile_id)
+        profile = profile_query.order_by(Profile.id.desc()).first()
+        if not profile:
+            raise HTTPException(status_code=404, detail="Upload a resume first")
+
+        profile_info = {"id": profile.id, "file_name": profile.file_name or ""}
+
+        new_ids, counts, errors = scrape_for_profile(
+            db, profile, per_term=int(os.getenv("SCRAPE_RECOMMEND_PER_TERM", "8")), max_terms=2
+        )
+
+        if not new_ids:
+            status = "some_failed" if errors else "no_new"
+            return {
+                "profile_found": True,
+                "profile": profile_info,
+                "added": 0,
+                "counts": counts,
+                "errors": errors[:10],
+                "status": status,
+                "results": [],
+                "total_jobs": 0,
+                "total_pages": 0,
+            }
+
+        jobs = db.query(Job).filter(Job.id.in_(new_ids)).all()
+        candidates = [
+            {
+                "id": j.id,
+                "title": j.title,
+                "company": j.company,
+                "location": j.location,
+                "description": j.description,
+                "skills": j.skills or [],
+                "apply_url": j.apply_url,
+                "salary_min": j.salary_min,
+                "salary_max": j.salary_max,
+                "salary_interval": j.salary_interval,
+                "salary_currency": j.salary_currency,
+                "date_posted": j.date_posted,
+                "source": j.source,
+            }
+            for j in jobs
+        ]
+
+        profile_data = {
+            "skills": profile.skills or [],
+            "experience": profile.experience,
+            "education": profile.education,
+            "years_of_experience": profile.years_of_experience,
+            "profile_summary": (profile.profile_summary or "") if isinstance(profile.profile_summary, str) else "",
+            "location": (profile.personal_info or {}).get("location") if isinstance(profile.personal_info, dict) else None,
+        }
+
+        matched = match_profile_to_jobs(profile_data, candidates, page=1, limit=10)
+        return {
+            "profile_found": True,
+            "profile": profile_info,
+            "added": len(new_ids),
+            "counts": counts,
+            "errors": errors[:10],
+            "status": "ok",
+            **matched,
+        }
     finally:
         db.close()
 

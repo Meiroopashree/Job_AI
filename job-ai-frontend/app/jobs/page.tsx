@@ -43,6 +43,7 @@ export default function BrowseJobsPage() {
   const [search, setSearch] = useState("");
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
+  const [postedDays, setPostedDays] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [companyInput, setCompanyInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
@@ -53,6 +54,9 @@ export default function BrowseJobsPage() {
   const [backfillMsg, setBackfillMsg] = useState("");
   const [descFilling, setDescFilling] = useState(false);
   const [descFillMsg, setDescFillMsg] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [fetchMsg, setFetchMsg] = useState("");
+  const [fetchMsgType, setFetchMsgType] = useState<"ok" | "err" | "">("");
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -62,6 +66,7 @@ export default function BrowseJobsPage() {
       if (search) params.search = search;
       if (company) params.company = company;
       if (location) params.location = location;
+      if (postedDays) params.posted_days = postedDays;
       const res = await api.get("/jobs", { params });
       setJobs(res.data.jobs || []);
       setTotalPages(res.data.total_pages || 1);
@@ -71,7 +76,7 @@ export default function BrowseJobsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, company, location]);
+  }, [page, search, company, location, postedDays]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -88,6 +93,50 @@ export default function BrowseJobsPage() {
     setCompany(companyInput.trim());
     setLocation(locationInput.trim());
     setPage(1);
+  };
+
+  const handlePostedChange = (value: string) => {
+    setPostedDays(Number(value) || 0);
+    setPage(1);
+  };
+
+  const handleFetchNew = async () => {
+    setFetching(true);
+    setFetchMsg("");
+    setFetchMsgType("");
+    try {
+      const res = await api.post("/jobs/scrape-recommend");
+      const d = res.data;
+      if (d?.status === "ok" && d?.added) {
+        setFetchMsg(
+          `Fetched fresh jobs for your resume — added ${d.added} new job${d.added === 1 ? "" : "s"} to the database. Showing them below.`
+        );
+        setFetchMsgType("ok");
+        setPostedDays(0);
+        setSearch("");
+        setCompany("");
+        setLocation("");
+        setSearchInput("");
+        setCompanyInput("");
+        setLocationInput("");
+        setPage(1);
+        fetchJobs();
+      } else if (d?.status === "no_new" || (d?.added === 0 && !d?.errors?.length)) {
+        setFetchMsg("No new jobs found for your resume right now. Try again later.");
+        setFetchMsgType("");
+      } else if (d?.status === "some_failed" || d?.errors?.length) {
+        setFetchMsg("Scraping partially failed and added no new jobs. Check your region and try again.");
+        setFetchMsgType("err");
+      } else {
+        setFetchMsg(d?.detail || "No new jobs found.");
+        setFetchMsgType("err");
+      }
+    } catch (err) {
+      setFetchMsg(apiDetail(err, "Failed to fetch new jobs"));
+      setFetchMsgType("err");
+    } finally {
+      setFetching(false);
+    }
   };
 
   const handleBackfill = async () => {
@@ -194,8 +243,41 @@ export default function BrowseJobsPage() {
         </div>
       )}
 
+      {/* Fetch fresh jobs for the newest resume */}
+      <div className="mb-6 flex flex-col gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 p-4 dark:border-indigo-900 dark:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Need fresh matches?
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Scrapes LinkedIn + Indeed using your latest resume&apos;s skills and location, stores them,
+            and shows the best new matches.
+          </p>
+        </div>
+        <button
+          onClick={handleFetchNew}
+          disabled={fetching}
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+        >
+          <RefreshCw className={`size-4 ${fetching ? "animate-spin" : ""}`} />
+          {fetching ? "Scraping..." : "Fetch new jobs for my resume"}
+        </button>
+      </div>
+
+      {fetchMsg && (
+        <div
+          className={`mb-4 animate-pop rounded-xl border px-4 py-2.5 text-sm ${
+            fetchMsgType === "err"
+              ? "border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-400"
+              : "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400"
+          }`}
+        >
+          {fetchMsg}
+        </div>
+      )}
+
       {/* Filters */}
-      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end">
+      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_170px_auto] lg:items-end">
         <div className="sm:col-span-2 lg:col-span-1">
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Search
@@ -240,9 +322,27 @@ export default function BrowseJobsPage() {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSearch();
             }}
-            placeholder="e.g. Dallas, TX"
+            placeholder="e.g. Bengaluru"
             className="input-base h-11 rounded-lg px-3"
           />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            Posted
+          </label>
+          <select
+            value={postedDays}
+            onChange={(e) => handlePostedChange(e.target.value)}
+            className="input-base h-11 rounded-lg px-3"
+          >
+            <option value={0}>Anytime</option>
+            <option value={1}>Last 24 hours</option>
+            <option value={7}>Last 7 days</option>
+            <option value={14}>Last 14 days</option>
+            <option value={30}>Last 30 days</option>
+            <option value={60}>Last 60 days</option>
+            <option value={90}>Last 90 days</option>
+          </select>
         </div>
         <button
           onClick={handleSearch}
