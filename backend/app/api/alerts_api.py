@@ -50,6 +50,7 @@ def _profile_data(profile: Profile) -> dict:
         "education": profile.education,
         "years_of_experience": profile.years_of_experience,
         "profile_summary": (profile.profile_summary or "") if isinstance(profile.profile_summary, str) else "",
+        "location": (profile.personal_info or {}).get("location") if isinstance(profile.personal_info, dict) else None,
     }
 
 

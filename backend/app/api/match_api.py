@@ -43,6 +43,7 @@ def match_jobs(
             "education": profile.education,
             "years_of_experience": profile.years_of_experience,
             "profile_summary": profile.profile_summary or "",
+            "location": (profile.personal_info or {}).get("location") if isinstance(profile.personal_info, dict) else None,
         }
 
         job_list = [

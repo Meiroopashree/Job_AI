@@ -4,6 +4,14 @@ from app.services.profile_vectorizer import build_profile_text
 from app.services.job_vectorizer import build_job_text
 from app.services.job_normalizer import extract_skills
 from app.services.explanation_service import generate_match_explanation
+from app.services.location_classifier import (
+    detect_country_codes,
+    infer_profile_country,
+    is_junk_location,
+)
+
+MIN_SKILL_MATCHES = 1
+MIN_MATCH_PERCENT = 60.0
 
 
 def _skills_match(profile_skill: str, job_skill: str) -> bool:
@@ -27,6 +35,7 @@ def _skills_match(profile_skill: str, job_skill: str) -> bool:
 
 def match_profile_to_jobs(profile, jobs, page=1, limit=10):
     profile_text = build_profile_text(profile)
+    profile_country = infer_profile_country(profile.get("location") or "")
     profile_skills = set(
         skill.lower().strip()
         for skill in (profile.get("skills") or [])
@@ -41,6 +50,13 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
     results = []
 
     for idx, job in enumerate(jobs):
+        job_location = job.get("location")
+        if is_junk_location(job_location):
+            continue
+        job_countries = detect_country_codes(job_location)
+        if profile_country and job_countries and profile_country not in job_countries:
+            continue
+
         job_text = build_job_text(job)
 
         job_skills = set(
@@ -57,13 +73,12 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
 
         similarity = similarities[idx] if has_similarities else 0
 
-        if len(matched_skills) > 0 and job_skills:
-            skill_coverage = len(matched_skills) / len(job_skills)
-            final_score_percent = round((0.4 * similarity + 0.6 * skill_coverage) * 100, 2)
-        else:
-            final_score_percent = round(similarity * 35, 2)
+        if len(matched_skills) < MIN_SKILL_MATCHES:
+            continue
+        skill_coverage = len(matched_skills) / len(job_skills)
+        final_score_percent = round((0.4 * similarity + 0.6 * skill_coverage) * 100, 2)
 
-        if final_score_percent < 30:
+        if final_score_percent < MIN_MATCH_PERCENT:
             continue
 
         explanation = generate_match_explanation(

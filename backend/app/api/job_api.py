@@ -246,6 +246,7 @@ def recommended_jobs(
             "education": profile.education,
             "years_of_experience": profile.years_of_experience,
             "profile_summary": (profile.profile_summary or "") if isinstance(profile.profile_summary, str) else "",
+            "location": (profile.personal_info or {}).get("location") if isinstance(profile.personal_info, dict) else None,
         }
 
         matched = match_profile_to_jobs(profile_data, candidates, page=1, limit=max(1, min(limit, 10)))
