@@ -536,6 +536,12 @@ export default function BrowseJobsPage() {
         </div>
       )}
 
+      {!loading && !error && savedOnly && jobs.length > 0 && jobs.filter((job) => bookmarkedIds.has(job.id)).length === 0 && (
+        <div className="animate-pop rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+          No saved jobs to show yet. Click the bookmark icon on any job to save it, then filter by “Saved only”.
+        </div>
+      )}
+
       {!loading && !error && jobs.length === 0 && (
         <div className="animate-fade-up rounded-2xl border border-slate-200/60 bg-white/80 py-16 text-center dark:border-slate-800 dark:bg-slate-900/70">
           <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
