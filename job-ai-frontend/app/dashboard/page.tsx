@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useResume } from "@/contexts/ResumeContext";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { apiDetail } from "@/lib/apiError";
@@ -98,14 +99,6 @@ interface ScrapedJob {
   location: string;
 }
 
-interface Profile {
-  id: number;
-  file_name?: string;
-  skills: string[];
-  years_of_experience?: number;
-  created_at?: string;
-}
-
 function PlatformBadge({ id }: { id: string }) {
   const base = "inline-flex size-11 items-center justify-center rounded-xl font-bold text-lg shadow-inner";
   return id === "linkedin" ? (
@@ -119,13 +112,12 @@ export default function DashboardPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { stats, loading: statsLoading } = useStats();
+  const { profiles, selectedProfileId, setSelectedProfileId, refreshProfiles } = useResume();
   const [selectedPlatform, setSelectedPlatform] = useState<string>("linkedin");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [scraping, setScraping] = useState(false);
   const [scrapedJobs, setScrapedJobs] = useState<ScrapedJob[]>([]);
   const [scrapeMessage, setScrapeMessage] = useState("");
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [matching, setMatching] = useState(false);
   const [autoStatus, setAutoStatus] = useState<AutoStatus | null>(null);
   const [autoRunning, setAutoRunning] = useState(false);
@@ -141,23 +133,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
   }, [user, isLoading, router]);
-
-  const fetchProfiles = async () => {
-    try {
-      const res = await api.get("/upload-resume/list");
-      setProfiles(res.data || []);
-      if (res.data?.length > 0 && !selectedProfileId) {
-        setSelectedProfileId(res.data[0].id);
-      }
-    } catch {
-      // no profiles yet
-    }
-  };
-
-  useEffect(() => {
-    if (user) void Promise.resolve().then(fetchProfiles);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
 
   const fetchRecommended = async () => {
     setRecLoading(true);
@@ -322,10 +297,7 @@ export default function DashboardPage() {
     if (!confirm(`Delete "${name || `Resume #${id}`}"? This cannot be undone.`)) return;
     try {
       await api.delete(`/upload-resume/${id}`);
-      setProfiles((prev) => prev.filter((p) => p.id !== id));
-      if (selectedProfileId === id) {
-        setSelectedProfileId(profiles.find((p) => p.id !== id)?.id || null);
-      }
+      await refreshProfiles();
     } catch (err) {
       alert(apiDetail(err, "Failed to delete"));
     }
@@ -582,9 +554,25 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
+              {profiles.length > 0 && (
+                <label className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <span className="hidden whitespace-nowrap sm:inline">Resume</span>
+                  <select
+                    value={selectedProfileId || ""}
+                    onChange={(e) => setSelectedProfileId(Number(e.target.value))}
+                    className="h-8 max-w-44 rounded-lg border border-slate-300 bg-white px-2 text-xs font-medium text-slate-900 outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {profiles.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.file_name || `Resume #${p.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <Link
                 href="/jobs"
-                className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400"
+                className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400"
               >
                 Browse all
                 <ArrowRight className="size-3.5" />

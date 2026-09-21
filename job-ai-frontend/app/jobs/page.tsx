@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useResume } from "@/contexts/ResumeContext";
 import { api } from "@/lib/api";
 import { apiDetail } from "@/lib/apiError";
 import {
@@ -36,6 +37,7 @@ interface JobRow {
 export default function BrowseJobsPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const { profiles, selectedProfileId, setSelectedProfileId } = useResume();
 
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +107,9 @@ export default function BrowseJobsPage() {
     setFetchMsg("");
     setFetchMsgType("");
     try {
-      const res = await api.post("/jobs/scrape-recommend");
+      const res = await api.post("/jobs/scrape-recommend", {
+        profile_id: selectedProfileId || undefined,
+      });
       const d = res.data;
       if (d?.status === "ok" && d?.added) {
         setFetchMsg(
@@ -243,16 +247,32 @@ export default function BrowseJobsPage() {
         </div>
       )}
 
-      {/* Fetch fresh jobs for the newest resume */}
+      {/* Fetch fresh jobs for the selected resume */}
       <div className="mb-6 flex flex-col gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 p-4 dark:border-indigo-900 dark:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
             Need fresh matches?
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Scrapes LinkedIn + Indeed using your latest resume&apos;s skills and location, stores them,
-            and shows the best new matches.
+            Scrapes LinkedIn + Indeed using the selected resume&apos;s skills and location, stores
+            them, and shows the best new matches.
           </p>
+          {profiles.length > 0 && (
+            <label className="mt-2 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <span className="whitespace-nowrap">Resume</span>
+              <select
+                value={selectedProfileId || ""}
+                onChange={(e) => setSelectedProfileId(Number(e.target.value))}
+                className="h-8 max-w-56 rounded-lg border border-indigo-200 bg-white px-2 text-xs font-medium text-slate-900 outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                {profiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.file_name || `Resume #${p.id}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
         <button
           onClick={handleFetchNew}
