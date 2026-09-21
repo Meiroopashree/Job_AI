@@ -33,7 +33,14 @@ def _skills_match(profile_skill: str, job_skill: str) -> bool:
     return common_prefix >= 5 and common_prefix >= 0.6 * shorter
 
 
-def match_profile_to_jobs(profile, jobs, page=1, limit=10):
+def _job_is_excluded(job: dict, excluded_ids: set) -> bool:
+    if excluded_ids and job.get("id") in excluded_ids:
+        return True
+    return bool(job.get("duplicate_of"))
+
+
+def match_profile_to_jobs(profile, jobs, page=1, limit=10, excluded_ids=None):
+    excluded = set(excluded_ids or [])
     profile_text = build_profile_text(profile)
     profile_country = infer_profile_country(profile.get("location") or "")
     profile_skills = set(
@@ -43,19 +50,28 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
     if not profile_skills:
         profile_skills = set(extract_skills(profile_text))
 
-    job_texts = [build_job_text(job) for job in jobs]
-    similarities = compute_similarities(profile_text, job_texts)
-    has_similarities = len(similarities) == len(jobs)
-
-    results = []
+    scores = []
+    similar = compute_similarities(
+        profile_text,
+        [build_job_text(job) for job in jobs],
+        job_embeddings=[job.get("embedding") for job in jobs],
+    )
+    has_similarities = len(similar) == len(jobs)
 
     for idx, job in enumerate(jobs):
+        if _job_is_excluded(job, excluded):
+            continue
+
         job_location = job.get("location")
         if is_junk_location(job_location):
             continue
-        job_countries = detect_country_codes(job_location)
-        if profile_country and job_countries and profile_country not in job_countries:
-            continue
+
+        # A remote job can be applied from anywhere, so skip the country filter
+        # for remote postings even when the profile country is known.
+        if not job.get("is_remote"):
+            job_countries = detect_country_codes(job_location)
+            if profile_country and job_countries and profile_country not in job_countries:
+                continue
 
         job_text = build_job_text(job)
 
@@ -71,11 +87,11 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
             if any(_skills_match(ps, js) for ps in profile_skills)
         )
 
-        similarity = similarities[idx] if has_similarities else 0
+        similarity = similar[idx] if has_similarities else 0
 
         if len(matched_skills) < MIN_SKILL_MATCHES:
             continue
-        skill_coverage = len(matched_skills) / len(job_skills)
+        skill_coverage = len(matched_skills) / len(job_skills) if job_skills else 0
         final_score_percent = round((0.4 * similarity + 0.6 * skill_coverage) * 100, 2)
 
         if final_score_percent < MIN_MATCH_PERCENT:
@@ -85,7 +101,7 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
             profile, job, job_skills=job_skills, matched_skills=matched_skills
         )
 
-        results.append({
+        scores.append({
             "job": {
                 "id": job.get("id"),
                 "title": job.get("title"),
@@ -99,14 +115,16 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
                 "salary_currency": job.get("salary_currency"),
                 "date_posted": job.get("date_posted"),
                 "source": job.get("source"),
+                "is_remote": bool(job.get("is_remote")),
             },
             "match_percentage": final_score_percent,
-            "explanation": explanation
+            "matched_skills": sorted(explanation.get("matched_skills") or []),
+            "explanation": explanation,
         })
 
-    results.sort(key=lambda x: x["match_percentage"], reverse=True)
+    scores.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-    total_jobs = len(results)
+    total_jobs = len(scores)
     start = (page - 1) * limit
     end = start + limit
 
@@ -115,5 +133,5 @@ def match_profile_to_jobs(profile, jobs, page=1, limit=10):
         "limit": limit,
         "total_jobs": total_jobs,
         "total_pages": (total_jobs + limit - 1) // limit,
-        "results": results[start:end]
+        "results": scores[start:end],
     }

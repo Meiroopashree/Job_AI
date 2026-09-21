@@ -16,6 +16,7 @@ import {
   Calendar,
   Globe,
   Wand2,
+  Bookmark,
 } from "lucide-react";
 import { PageHeader, HeroPrimaryButton, HeroSecondaryButton } from "@/components/PageHeader";
 
@@ -53,6 +54,8 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
   const params = useParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -78,8 +81,29 @@ export default function JobDetailPage() {
       }
     };
     fetchJob();
+    api
+      .get("/jobs/bookmarks")
+      .then((res) => {
+        const ids = new Set<number>((res.data.bookmarks || []).map((b: { id: number }) => b.id));
+        setBookmarked(ids.has(Number(jobId)));
+      })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId, user, isLoading]);
+
+  const toggleBookmark = async () => {
+    if (bookmarkBusy) return;
+    setBookmarkBusy(true);
+    try {
+      if (bookmarked) await api.delete(`/jobs/${jobId}/bookmark`);
+      else await api.post(`/jobs/${jobId}/bookmark`);
+      setBookmarked(!bookmarked);
+    } catch {
+      // ignore
+    } finally {
+      setBookmarkBusy(false);
+    }
+  };
 
   if (isLoading || !user) return null;
 
@@ -172,6 +196,19 @@ export default function JobDetailPage() {
             }
             actions={
               <>
+                <button
+                  onClick={toggleBookmark}
+                  disabled={bookmarkBusy}
+                  title={bookmarked ? "Remove bookmark" : "Bookmark for later"}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+                    bookmarked
+                      ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400"
+                      : "border-slate-300 text-slate-600 hover:border-amber-300 hover:text-amber-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-800 dark:hover:text-amber-400"
+                  }`}
+                >
+                  <Bookmark className={`size-4 ${bookmarked ? "fill-current" : ""}`} />
+                  {bookmarked ? "Bookmarked" : "Bookmark"}
+                </button>
                 <HeroPrimaryButton href={`/jobs/job/${job.id}/apply`}>
                   <Wand2 className="size-4" />
                   Auto-Fill Apply

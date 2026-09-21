@@ -67,7 +67,24 @@ def _job_dict(job: Job) -> dict:
         "salary_currency": job.salary_currency,
         "date_posted": job.date_posted,
         "source": job.source,
+        "is_remote": bool(job.is_remote),
     }
+
+
+def _dedupe_lines(lines: list) -> list:
+    seen = set()
+    out = []
+    for ln in lines:
+        key = f"{(ln.get('title') or '').lower().strip()}|{(ln.get('company') or '').lower().strip()}"
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(ln)
+    return out
+
+
+def _max_alert_jobs() -> int:
+    return max(1, int(os.getenv("ALERT_MAX_JOBS", "8")))
 
 
 def _do_auto_scrape() -> dict:
@@ -157,12 +174,13 @@ def send_new_match_digests(db, new_job_ids: list) -> dict:
                 "title": item["job"]["title"],
                 "company": item["job"]["company"],
                 "match": item["match_percentage"],
+                "matched_skills": item.get("matched_skills") or [],
             }
             digests.setdefault(user.id, {"email": user.email, "lines": []})
             digests[user.id]["lines"].append(line)
 
     for user_id, payload in digests.items():
-        lines = payload["lines"]
+        lines = _dedupe_lines(payload["lines"])[:_max_alert_jobs()]
         if not lines:
             continue
         _set_step(f"Sending alert email to {payload['email']}...")
@@ -178,6 +196,10 @@ def send_new_match_digests(db, new_job_ids: list) -> dict:
             body_lines.append(
                 f"- {ln['title']} at {ln['company']} — {ln['match']}% match{salary}"
             )
+            if ln.get("matched_skills"):
+                body_lines.append(
+                    f"  Skills you have: {', '.join(ln['matched_skills'][:6])}"
+                )
             body_lines.append(
                 f"  {FRONTEND_URL}/jobs/job/{ln['job_id']}"
             )

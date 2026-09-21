@@ -17,6 +17,7 @@ from app.api.applications_api import router as applications_router
 from app.api.generate_api import router as generate_router
 from app.api.apply_api import router as apply_router
 from app.api.alerts_api import router as alerts_router
+from app.api.seed_api import router as seed_router
 from app.db.init_db import init_db
 from app.services import auto_scrape_service
 
@@ -81,6 +82,7 @@ app.include_router(applications_router)
 app.include_router(generate_router)
 app.include_router(apply_router)
 app.include_router(alerts_router)
+app.include_router(seed_router)
 
 
 @app.get("/", tags=["System"])
@@ -101,6 +103,15 @@ def root():
             "/jobs/backfill",
             "/jobs/auto-scrape/status",
             "/jobs/auto-scrape/run",
+            "/jobs/recommended",
+            "/jobs/scrape-recommend",
+            "/jobs/dedupe",
+            "/jobs/backfill-locations",
+            "/jobs/embeddings",
+            "/jobs/scraper-health",
+            "/jobs/bookmarks",
+            "/jobs/{job_id}/bookmark",
+            "/jobs/{job_id}/exclude",
             "/jobs/{job_id}",
             "/match/{profile_id}",
             "/ats/check/{profile_id}",
@@ -113,7 +124,7 @@ def root():
             "/alerts/status",
             "/alerts/test",
             "/alerts/send-now",
-            "/jobs/recommended",
+            "/seed/demo",
             "/health",
         ],
     }

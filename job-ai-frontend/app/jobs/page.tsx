@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { apiDetail } from "@/lib/apiError";
 import {
   ArrowRight,
+  Bookmark,
   Briefcase,
   Building2,
   ChevronRight,
@@ -31,7 +32,26 @@ interface JobRow {
   skills: string[];
   description: string;
   apply_url: string;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  salary_interval?: string | null;
+  salary_currency?: string | null;
+  is_remote?: boolean;
   created_at: string;
+}
+
+function formatSalary(min?: number | null, max?: number | null, interval?: string | null, currency?: string | null): string | null {
+  if (!min && !max) return null;
+  const fmt = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : String(Math.round(n)));
+  const cur = currency || "$";
+  const intervalLabel = interval === "hourly" ? "/hr" : interval === "monthly" ? "/mo" : interval === "yearly" ? "/yr" : "";
+  if (min && max) return `${cur}${fmt(min)} - ${cur}${fmt(max)}${intervalLabel}`;
+  if (min) return `${cur}${fmt(min)}+${intervalLabel}`;
+  return `Up to ${cur}${fmt(max!)}${intervalLabel}`;
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 export default function BrowseJobsPage() {
@@ -46,6 +66,11 @@ export default function BrowseJobsPage() {
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
   const [postedDays, setPostedDays] = useState(0);
+  const [salaryMin, setSalaryMin] = useState("");
+  const [salaryMax, setSalaryMax] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set());
   const [searchInput, setSearchInput] = useState("");
   const [companyInput, setCompanyInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
@@ -69,6 +94,9 @@ export default function BrowseJobsPage() {
       if (company) params.company = company;
       if (location) params.location = location;
       if (postedDays) params.posted_days = postedDays;
+      if (salaryMin.trim()) params.min_salary = Number(salaryMin);
+      if (salaryMax.trim()) params.max_salary = Number(salaryMax);
+      if (sort !== "newest") params.sort = sort;
       const res = await api.get("/jobs", { params });
       setJobs(res.data.jobs || []);
       setTotalPages(res.data.total_pages || 1);
@@ -78,7 +106,17 @@ export default function BrowseJobsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, company, location, postedDays]);
+  }, [page, search, company, location, postedDays, salaryMin, salaryMax, sort]);
+
+  const fetchBookmarks = useCallback(async () => {
+    try {
+      const res = await api.get("/jobs/bookmarks");
+      const ids = new Set<number>((res.data.bookmarks || []).map((b: { id: number }) => b.id));
+      setBookmarkedIds(ids);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -87,8 +125,25 @@ export default function BrowseJobsPage() {
     }
     if (!user) return;
     void Promise.resolve().then(fetchJobs);
+    void Promise.resolve().then(fetchBookmarks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchJobs, user, isLoading]);
+
+  const toggleBookmark = async (jobId: number) => {
+    const isBookmarked = bookmarkedIds.has(jobId);
+    try {
+      if (isBookmarked) await api.delete(`/jobs/${jobId}/bookmark`);
+      else await api.post(`/jobs/${jobId}/bookmark`);
+      setBookmarkedIds((prev) => {
+        const next = new Set(prev);
+        if (isBookmarked) next.delete(jobId);
+        else next.add(jobId);
+        return next;
+      });
+    } catch {
+      // ignore
+    }
+  };
 
   const handleSearch = () => {
     setSearch(searchInput.trim());
@@ -102,6 +157,42 @@ export default function BrowseJobsPage() {
     setPage(1);
   };
 
+  const pollScrapeJob = async (jobId: number, attempts = 60) => {
+    for (let i = 0; i < attempts; i++) {
+      await sleep(2500);
+      const res = await api.get(`/jobs/scrape-recommend/${jobId}`);
+      const s = res.data?.status;
+      if (s === "done" || s === "failed") return res.data;
+    }
+    return { status: "failed", error: "Timed out waiting for the scrape to finish." };
+  };
+
+  const applyScrapeResult = (d: { added?: number | string; error?: string }) => {
+    const added = Number(d?.added) || 0;
+    if (added > 0) {
+      setFetchMsg(
+        `Fetched fresh jobs for your resume — added ${added} new job${added === 1 ? "" : "s"} to the database. Showing them below.`
+      );
+      setFetchMsgType("ok");
+    } else {
+      setFetchMsg(
+        d?.error
+          ? `Scraping failed: ${d.error}`
+          : "No new jobs found for your resume right now. Try again later."
+      );
+      setFetchMsgType(d?.error ? "err" : "");
+    }
+    setPostedDays(0);
+    setSearch("");
+    setCompany("");
+    setLocation("");
+    setSearchInput("");
+    setCompanyInput("");
+    setLocationInput("");
+    setPage(1);
+    fetchJobs();
+  };
+
   const handleFetchNew = async () => {
     setFetching(true);
     setFetchMsg("");
@@ -111,29 +202,16 @@ export default function BrowseJobsPage() {
         profile_id: selectedProfileId || undefined,
       });
       const d = res.data;
-      if (d?.status === "ok" && d?.added) {
-        setFetchMsg(
-          `Fetched fresh jobs for your resume — added ${d.added} new job${d.added === 1 ? "" : "s"} to the database. Showing them below.`
-        );
-        setFetchMsgType("ok");
-        setPostedDays(0);
-        setSearch("");
-        setCompany("");
-        setLocation("");
-        setSearchInput("");
-        setCompanyInput("");
-        setLocationInput("");
-        setPage(1);
-        fetchJobs();
-      } else if (d?.status === "no_new" || (d?.added === 0 && !d?.errors?.length)) {
-        setFetchMsg("No new jobs found for your resume right now. Try again later.");
+      if (d?.job_id) {
+        setFetchMsg("Scraping fresh jobs in the background — this may take a minute...");
         setFetchMsgType("");
-      } else if (d?.status === "some_failed" || d?.errors?.length) {
-        setFetchMsg("Scraping partially failed and added no new jobs. Check your region and try again.");
+        applyScrapeResult(await pollScrapeJob(Number(d.job_id)));
+      } else if (d?.detail) {
+        setFetchMsg(d.detail);
         setFetchMsgType("err");
       } else {
-        setFetchMsg(d?.detail || "No new jobs found.");
-        setFetchMsgType("err");
+        setFetchMsg("No new jobs found for your resume right now. Try again later.");
+        setFetchMsgType("");
       }
     } catch (err) {
       setFetchMsg(apiDetail(err, "Failed to fetch new jobs"));
@@ -297,7 +375,7 @@ export default function BrowseJobsPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_170px_auto] lg:items-end">
+      <div className="mb-6 grid gap-3 surface p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_150px_150px_150px] lg:items-end">
         <div className="sm:col-span-2 lg:col-span-1">
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Search
@@ -364,13 +442,78 @@ export default function BrowseJobsPage() {
             <option value={90}>Last 90 days</option>
           </select>
         </div>
-        <button
-          onClick={handleSearch}
-          className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] sm:col-span-2 lg:col-span-1 lg:w-auto"
-        >
-          <Search className="size-4" />
-          Search
-        </button>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            Min salary
+          </label>
+          <input
+            type="number"
+            min={0}
+            value={salaryMin}
+            onChange={(e) => {
+              setSalaryMin(e.target.value);
+              setPage(1);
+            }}
+            placeholder="e.g. 80000"
+            className="input-base h-11 rounded-lg px-3"
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            Max salary
+          </label>
+          <input
+            type="number"
+            min={0}
+            value={salaryMax}
+            onChange={(e) => {
+              setSalaryMax(e.target.value);
+              setPage(1);
+            }}
+            placeholder="e.g. 150000"
+            className="input-base h-11 rounded-lg px-3"
+          />
+        </div>
+        <div className="flex flex-wrap items-end gap-3 sm:col-span-2 lg:col-span-6">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              Sort
+            </label>
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+                setPage(1);
+              }}
+              className="input-base h-11 rounded-lg px-3"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="salary_desc">Highest salary</option>
+              <option value="salary_asc">Lowest salary</option>
+              <option value="title">Title A-Z</option>
+            </select>
+          </div>
+          <label className="flex h-11 cursor-pointer items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+            <input
+              type="checkbox"
+              checked={savedOnly}
+              onChange={(e) => {
+                setSavedOnly(e.target.checked);
+                setPage(1);
+              }}
+              className="size-4 accent-indigo-600"
+            />
+            Saved only
+          </label>
+          <button
+            onClick={handleSearch}
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] lg:ml-auto"
+          >
+            <Search className="size-4" />
+            Search
+          </button>
+        </div>
       </div>
 
       {loading && (
@@ -414,7 +557,12 @@ export default function BrowseJobsPage() {
       {!loading && jobs.length > 0 && (
         <>
           <div className="mb-6 space-y-3">
-            {jobs.map((job) => (
+            {jobs
+              .filter((job) => !savedOnly || bookmarkedIds.has(job.id))
+              .map((job) => {
+                const isBookmarked = bookmarkedIds.has(job.id);
+                const salary = formatSalary(job.salary_min, job.salary_max, job.salary_interval, job.salary_currency);
+                return (
               <div
                 key={job.id}
                 className="group surface p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
@@ -440,10 +588,30 @@ export default function BrowseJobsPage() {
                           <MapPin className="size-3.5" />
                           {job.location || "Location not specified"}
                         </span>
+                        {job.is_remote && (
+                          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+                            Remote
+                          </span>
+                        )}
+                        {salary && (
+                          <span className="font-medium text-slate-600 dark:text-slate-300">{salary}</span>
+                        )}
                       </p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => toggleBookmark(job.id)}
+                      aria-label={isBookmarked ? "Remove bookmark" : "Bookmark job"}
+                      title={isBookmarked ? "Remove bookmark" : "Bookmark job"}
+                      className={`inline-flex size-8 items-center justify-center rounded-lg border transition-colors ${
+                        isBookmarked
+                          ? "border-amber-300 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400"
+                          : "border-slate-300 text-slate-500 hover:border-amber-300 hover:text-amber-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-amber-800 dark:hover:text-amber-400"
+                      }`}
+                    >
+                      <Bookmark className={`size-4 ${isBookmarked ? "fill-current" : ""}`} />
+                    </button>
                     {job.apply_url && (
                       <a
                         href={job.apply_url}
@@ -487,7 +655,8 @@ export default function BrowseJobsPage() {
                   </p>
                 )}
               </div>
-            ))}
+                );
+              })}
           </div>
 
           {totalPages > 1 && (

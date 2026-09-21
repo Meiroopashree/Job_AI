@@ -86,6 +86,23 @@ def send_test_alert(
     return {"message": "Test email sent", "email": user.email}
 
 
+def _dedupe_lines(lines: list) -> list:
+    seen = set()
+    out = []
+    for ln in lines:
+        key = f"{(ln.get('title') or '').lower().strip()}|{(ln.get('company') or '').lower().strip()}"
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(ln)
+    return out
+
+
+def _max_alert_jobs() -> int:
+    import os
+    return max(1, int(os.getenv("ALERT_MAX_JOBS", "8")))
+
+
 @router.post("/send-now")
 def send_alerts_now(
     user: User = Depends(get_current_user),
@@ -115,7 +132,7 @@ def send_alerts_now(
     cutoff = datetime.now(timezone.utc) - timedelta(days=7)
     jobs = (
         db.query(Job)
-        .filter(Job.created_at >= cutoff)
+        .filter(Job.created_at >= cutoff, Job.duplicate_of.is_(None))
         .order_by(Job.created_at.desc())
         .limit(200)
         .all()
@@ -124,7 +141,7 @@ def send_alerts_now(
     if not candidates:
         return {"message": "No new jobs to alert on yet", "sent": 0, "matches": 0}
 
-    matched = match_profile_to_jobs(_profile_data(profile), candidates, page=1, limit=8)
+    matched = match_profile_to_jobs(_profile_data(profile), candidates, page=1, limit=10)
 
     job_by_id = {j.id: j for j in jobs}
     lines = []
@@ -134,20 +151,32 @@ def send_alerts_now(
         job = job_by_id.get(jid)
         if not job:
             continue
-        salary = ""
-        if job.salary_min:
-            salary = f" ({job.salary_min:g}-{job.salary_max:g})" if job.salary_max else f" ({job.salary_min:g})"
-        lines.append(
-            f"- {item['job']['title']} at {item['job']['company']} - {item['match_percentage']}% match{salary}"
-        )
-        lines.append(f"  {FRONTEND_URL}/jobs/job/{jid}")
-        sent_ids.append(jid)
+        lines.append({
+            "job_id": jid,
+            "title": item["job"]["title"],
+            "company": item["job"]["company"],
+            "match": item["match_percentage"],
+            "matched_skills": item.get("matched_skills") or [],
+        })
+
+    lines = _dedupe_lines(lines)[:_max_alert_jobs()]
 
     if not lines:
         return {"message": "No new matches to alert on yet", "sent": 0, "matches": 0}
 
+    text_lines = []
+    for ln in lines:
+        salary = ""
+        job = job_by_id.get(ln["job_id"])
+        if job and job.salary_min:
+            salary = f" ({job.salary_min:g}-{job.salary_max:g})" if job.salary_max else f" ({job.salary_min:g})"
+        text_lines.append(f"- {ln['title']} at {ln['company']} — {ln['match']}% match{salary}")
+        if ln["matched_skills"]:
+            text_lines.append(f"  Skills you have: {', '.join(ln['matched_skills'][:6])}")
+        text_lines.append(f"  {FRONTEND_URL}/jobs/job/{ln['job_id']}")
+
     subject = f"JobAI - {len(lines)} new job match{'es' if len(lines) != 1 else ''} for you"
-    body = "We found jobs matching your profile:\n\n" + "\n".join(lines) + "\n\n- JobAI automatic job alerts"
+    body = "We found jobs matching your profile:\n\n" + "\n".join(text_lines) + "\n\n- JobAI automatic job alerts"
 
     ok, error = send_email_with_error(user.email, subject, body)
     if not ok:
@@ -156,8 +185,8 @@ def send_alerts_now(
             detail=f"Failed to send the digest email: {error or 'unknown error'}",
         )
 
-    for jid in sent_ids:
-        db.add(AlertLog(user_id=user.id, profile_id=profile.id, job_id=jid))
+    for ln in lines:
+        db.add(AlertLog(user_id=user.id, profile_id=profile.id, job_id=ln["job_id"]))
     db.commit()
 
     return {"message": "Digest sent", "sent": 1, "matches": len(lines)}

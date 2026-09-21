@@ -22,6 +22,8 @@ import {
   Building2,
   Mail,
   Send,
+  Bookmark,
+  X,
 } from "lucide-react";
 import { useStats } from "@/hooks/useStats";
 import { PageHeader, HeroPrimaryButton, HeroSecondaryButton } from "@/components/PageHeader";
@@ -61,6 +63,8 @@ interface RecommendedJob {
     apply_url?: string;
   };
   match_percentage: number;
+  matched_skills?: string[];
+  bookmarked?: boolean;
 }
 
 interface AlertsStatus {
@@ -129,6 +133,7 @@ export default function DashboardPage() {
   const [alertsStatus, setAlertsStatus] = useState<AlertsStatus | null>(null);
   const [alertsBusy, setAlertsBusy] = useState<"test" | "send" | null>(null);
   const [alertMsg, setAlertMsg] = useState("");
+  const [recBusy, setRecBusy] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
@@ -300,6 +305,36 @@ export default function DashboardPage() {
       await refreshProfiles();
     } catch (err) {
       alert(apiDetail(err, "Failed to delete"));
+    }
+  };
+
+  const toggleBookmark = async (jobId: number) => {
+    if (recBusy) return;
+    setRecBusy(jobId);
+    try {
+      const current = recJobs.find((r) => r.job.id === jobId)?.bookmarked;
+      if (current) await api.delete(`/jobs/${jobId}/bookmark`);
+      else await api.post(`/jobs/${jobId}/bookmark`);
+      setRecJobs((prev) =>
+        prev.map((r) => (r.job.id === jobId ? { ...r, bookmarked: !r.bookmarked } : r))
+      );
+    } catch {
+      // ignore
+    } finally {
+      setRecBusy(null);
+    }
+  };
+
+  const handleExclude = async (jobId: number) => {
+    if (recBusy) return;
+    setRecBusy(jobId);
+    try {
+      await api.post(`/jobs/${jobId}/exclude`);
+      setRecJobs((prev) => prev.filter((r) => r.job.id !== jobId));
+    } catch {
+      // ignore
+    } finally {
+      setRecBusy(null);
     }
   };
 
@@ -610,33 +645,86 @@ export default function DashboardPage() {
               <div className="hide-scrollbar max-h-96 space-y-2 overflow-y-auto pr-1">
                 {recJobs.map((item) => {
                   const pct = Math.round(Number(item.match_percentage) || 0);
+                  const jid = item.job.id;
+                  const bok = !!item.bookmarked;
+                  const busy = recBusy === jid;
+                  const matchedSkills = item.matched_skills || [];
                   return (
-                    <Link
-                      key={item.job.id}
-                      href={`/jobs/job/${item.job.id}/apply`}
-                      className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/60 p-3 transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/20"
+                    <div
+                      key={jid}
+                      className={`flex items-start gap-3 rounded-xl border p-3 transition-colors ${
+                        bok
+                          ? "border-amber-300 bg-amber-50/60 dark:border-amber-800 dark:bg-amber-950/10"
+                          : "border-slate-200/70 bg-slate-50/60 hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/20"
+                      }`}
                     >
                       <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400">
                         <Briefcase className="size-4" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-slate-900 dark:text-white">{item.job.title}</p>
+                        <Link
+                          href={`/jobs/job/${jid}/apply`}
+                          className="block truncate text-sm font-medium text-slate-900 transition-colors hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
+                        >
+                          {item.job.title}
+                        </Link>
                         <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                           {item.job.company} &middot; {item.job.location}
                         </p>
+                        {matchedSkills.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {matchedSkills.slice(0, 4).map((s, i) => (
+                              <span
+                                key={i}
+                                className="rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                            {matchedSkills.length > 4 && (
+                              <span className="text-[10px] text-slate-400">
+                                +{matchedSkills.length - 4}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <span
-                        className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
-                          pct >= 80
-                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
-                            : pct >= 60
-                              ? "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
-                              : "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
-                        }`}
-                      >
-                        {pct}%
-                      </span>
-                    </Link>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <span
+                          className={`rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+                            pct >= 80
+                              ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                              : pct >= 60
+                                ? "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+                                : "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                          }`}
+                        >
+                          {pct}%
+                        </span>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => toggleBookmark(jid)}
+                            disabled={busy}
+                            title={bok ? "Remove bookmark" : "Bookmark for later"}
+                            className={`rounded-md p-1.5 transition-colors disabled:opacity-50 ${
+                              bok
+                                ? "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+                                : "text-slate-400 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/30"
+                            }`}
+                          >
+                            <Bookmark className={`size-3.5 ${bok ? "fill-current" : ""}`} />
+                          </button>
+                          <button
+                            onClick={() => handleExclude(jid)}
+                            disabled={busy}
+                            title="Not for me — hide from recommendations"
+                            className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
